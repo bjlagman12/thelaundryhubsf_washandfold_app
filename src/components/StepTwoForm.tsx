@@ -38,8 +38,8 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
     return value.toString();
   };
 
-  // Only show error if user tried to submit without agreeing
   const [showError, setShowError] = React.useState(false);
+  const [showTerms, setShowTerms] = React.useState(false);
 
   const onSubmit = (data: OrderForm) => {
     if (!agree) {
@@ -68,84 +68,92 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
               </li>
             ))}
         </ul>
-        <div className="bg-blue-100 border border-blue-300 p-4 rounded mb-4 text-gray-700">
-          <h3 className="font-bold mb-2 text-sm">Terms & Conditions</h3>
-          <div className="text-[10px]">
-            <p>
-              <strong>Products Used: </strong>
-              We use Hypoallergenic Laundry Detergent, a fragrance-free,
-              eco-friendly, and skin-safe solution for all wash & fold orders.
-            </p>
-            <p className="mt-2">
-              <strong>Wash Settings: </strong>
-              We wash colored garments in cold water to minimize bleeding and
-              whites in warm water for better cleaning. Specific preferences
-              should be noted in the "Special Instructions" section.
-            </p>
-            <p className="mt-2">
-              <strong>Garment Care & Limitations: </strong> We take great care
-              with your laundry, but we cannot guarantee:
-              <br />
-              • Complete removal of stains (some may be permanent)
-              <br />
-              • Protection from damage to weak or aging fabrics
-              <br />
-              • Prevention of color fading, bleeding, or shrinking
-              <br />
-              • Preservation of decorative elements (buttons, zippers, beads,
-              ties, etc.)
-              <br />
-              Instructions are followed to the best of our ability, but The
-              Laundry Hub SF is not liable for damage due to fabric condition or
-              inherent material flaws.
-            </p>
-            <p className="mt-2">
-              <strong>Lost or Damaged Items: </strong>
-              Our liability is limited to the cost of service for the affected
-              load. We do not reimburse replacement costs for lost or damaged
-              garments.
-            </p>
-            <p className="mt-2">
-              <strong>Prohibited Items: </strong>
-              Please do not include the following in your laundry:
-              <br />
-              • Items contaminated with bodily fluids, grease, or other
-              hazardous materials
-              <br />• Sharp objects, electronics, or valuables
-            </p>
-            <p className="mt-2">
-              <strong>Unclaimed Orders: </strong>
-              Orders not picked up within 14 days of completion may be donated
-              due to limited storage space. We are not responsible for unclaimed
-              items beyond this period.
-            </p>
-            <p className="mt-2">
-              <strong>Service & Payment Acknowledgement: </strong>
-              By placing a laundry order, you acknowledge and agree to the
-              service type selected and the associated pricing. All payments
-              must be completed through our online portal prior to pickup.
-            </p>
-            <p className="mt-2">
-              <strong>Payment Terms: </strong>
-              Payment is due prior to pickup. Pricing is based on weight,
-              laundry type, and any requested add-ons.
-            </p>
-            <p className="mt-2">
-              <strong>SMS Updates: </strong>
-              By submitting this form, you consent to receive SMS messages from
-              The Laundry Hub SF related to your laundry order, including order
-              confirmations and ready-for-pickup notifications. Standard message
-              and data rates may apply.
-              <br />
-              Messages are sent only to the phone number you provide at
-              checkout. You will not be subscribed via text message.
-              <br />
-              To stop receiving messages, reply STOP at any time. For help,
-              reply HELP.
-            </p>
-          </div>
+
+        {/* 1) Collapsible Terms & Conditions */}
+        <div className="mb-4 border border-blue-300 rounded overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowTerms((f) => !f)}
+            className="w-full flex justify-between items-center bg-blue-100 p-3 text-left"
+          >
+            <span className="font-bold">Terms &amp; Conditions</span>
+            <span className="text-xl">{showTerms ? "−" : "+"}</span>
+          </button>
+
+          {showTerms && (
+            <div className="bg-blue-100 p-4 text-sm text-gray-700 space-y-2">
+              <p>
+                <strong>Products Used: </strong>
+                We use Hypoallergenic Laundry Detergent, a fragrance-free,
+                eco-friendly, and skin-safe solution for all wash & fold orders.
+              </p>
+              <p className="mt-2">
+                <strong>Wash Settings: </strong>
+                We wash colored garments in cold water to minimize bleeding and
+                whites in warm water for better cleaning. Specific preferences
+                should be noted in the "Special Instructions" section.
+              </p>
+              <p className="mt-2">
+                <strong>Garment Care & Limitations: </strong> We take great care
+                with your laundry, but we cannot guarantee:
+                <br />
+                • Complete removal of stains (some may be permanent)
+                <br />
+                • Protection from damage to weak or aging fabrics
+                <br />
+                • Prevention of color fading, bleeding, or shrinking
+                <br />
+                • Preservation of decorative elements (buttons, zippers, beads,
+                ties, etc.)
+                <br />
+                Instructions are followed to the best of our ability, but The
+                Laundry Hub SF is not liable for damage due to fabric condition
+                or inherent material flaws.
+              </p>
+              <p className="mt-2">
+                <strong>Lost or Damaged Items: </strong>
+                Our liability is limited to the cost of service for the affected
+                load. We do not reimburse replacement costs for lost or damaged
+                garments.
+              </p>
+              <p className="mt-2">
+                <strong>Prohibited Items: </strong>
+                Please do not include the following in your laundry:
+                <br />
+                • Items contaminated with bodily fluids, grease, or other
+                hazardous materials
+                <br />• Sharp objects, electronics, or valuables
+              </p>
+              <p className="mt-2">
+                <strong>Unclaimed Orders: </strong>
+                Orders not picked up within 14 days of completion may be donated
+                due to limited storage space. We are not responsible for
+                unclaimed items beyond this period.
+              </p>
+              <p className="mt-2">
+                <strong>Service & Payment Acknowledgement: </strong>
+                By placing a laundry order, you acknowledge and agree to the
+                service type selected and the associated pricing. All payments
+                must be completed through our online portal prior to pickup.
+              </p>
+              <p className="mt-2">
+                <strong>Payment Terms: </strong>
+                Payment is due prior to pickup. Pricing is based on weight,
+                laundry type, and any requested add-ons.
+              </p>
+            </div>
+          )}
         </div>
+
         <div className="mb-4 text-sm">
+          <p className="my-2">
+            <strong>SMS Updates: </strong>
+            By checking this box, you agree to The Laundry Hub SF's Terms &
+            Conditions and consent to receive SMS updates related to your
+            laundry order, including order confirmations, pickup notifications,
+            and refund alerts. Message & data rates may apply. Reply STOP to
+            unsubscribe.
+          </p>
           <input
             id="agree"
             type="checkbox"
