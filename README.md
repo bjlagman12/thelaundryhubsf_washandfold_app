@@ -1,59 +1,88 @@
-<<<<<<< HEAD
-# thelaundryhubsf_washandfold_app
-This is a simple app for our business to receive wash and fold orders
-=======
-# React + TypeScript + Vite
+# The Laundry Hub SF – Wash & Fold App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This app is designed for **The Laundry Hub SF** to receive, track, and manage wash & fold orders online.
 
-Currently, two official plugins are available:
+Customers can schedule drop-offs, enter contact details, and select their laundry service preferences. The app guides users through a simple multi-step process, sends order confirmations via SMS, and ensures a seamless laundry drop-off experience.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Admins (staff) have a secure login to view and manage incoming orders.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🚀 Try It Out
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- **Order laundry service (Customer Portal):**  
+  [https://thelaundryhubsf.web.app/form](https://thelaundryhubsf.web.app/form)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **Admin portal (Staff Only):**  
+  [https://thelaundryhubsf.web.app/authenticate](https://thelaundryhubsf.web.app/authenticate)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
->>>>>>> e0d94d2 (Add app)
+## ✨ Features
+
+- **Customer Workflow**
+
+  - Service selection (Premium or Basic)
+  - Date & time slot picker
+  - Multi-step form with validation
+  - Review & confirm before submission
+  - SMS confirmation with unique order ID
+
+- **Admin Portal**
+
+  - Secure login via Firebase Authentication
+  - View, filter, and update order status
+  - Add notes and track order progress
+
+- **Tech Stack**
+  - **Frontend:** React, React Hook Form, Tailwind CSS
+  - **Backend & Auth:** Firebase Authentication, Firestore
+  - **Deployment:** Firebase Hosting
+
+---
+
+## 📽️ Demo Video
+
+> _Watch a quick walkthrough of the app in action:_  
+> [▶️ Download or view the demo video](./thelaundryhubSFwnfapp.mov)
+
+---
+
+## 🛠️ Running Locally
+
+> _This is optional—most users can use the hosted site above._
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/bjlagman12/thelaundryhubsf_washandfold_app.git
+   cd thelaundryhubsf_washandfold_app
+
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Create a .env file in the project root and add your Firebase config:**
+
+   ```bash
+    VITE_FIREBASE_API_KEY=your_api_key
+    VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+    VITE_FIREBASE_PROJECT_ID=your_project_id
+    VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+    VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+    VITE_FIREBASE_APP_ID=your_app_id
+    VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+
+   ```
+
+4. **Start the development server**
+   ```bash
+    npm run dev
+
+   ```
+
+The app will be available at http://localhost:5173.
