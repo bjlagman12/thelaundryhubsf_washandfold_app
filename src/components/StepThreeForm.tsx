@@ -34,7 +34,7 @@ const StepThreeForm: React.FC<StepThreeFormProps> = ({ orderId }) => {
         </div>
         <p>We appreciate your business!</p>
         <a
-          href="https://google.com"
+          href="https://thelaundryhubsf.com/"
           aria-label="Go to homepage"
           className="text-blue-600 no-underline hover:underline transition mt-4 inline-block text-lg"
         >

@@ -45,7 +45,7 @@ const StepZeroForm = ({
         time. We wash, dry, and fold it with care. Ready for pickup in 48 hours.
         For more details on our services, please{" "}
         <a
-          href="https://google.com"
+          href="https://thelaundryhubsf.com/services#wash-fold"
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 no-underline hover:underline transition"

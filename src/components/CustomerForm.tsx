@@ -116,7 +116,7 @@ const CustomerForm: React.FC = () => {
           {/* Header */}
           <header className="flex justify-between items-center mb-6">
             <div className="flex items-center space-x-3">
-              <a href="https://google.com" aria-label="Go to homepage">
+              <a href="https://thelaundryhubsf.com" aria-label="Go to homepage">
                 <img
                   src={LH}
                   alt="The Laundry Hub SF logo"
