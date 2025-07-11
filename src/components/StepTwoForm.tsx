@@ -146,7 +146,7 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
         </div>
 
         <div className="mb-4 text-sm">
-          <p className="my-2">
+          <p className="my-4">
             <strong>SMS Updates: </strong>
             By checking this box, you agree to The Laundry Hub SF's Terms &
             Conditions and consent to receive SMS updates related to your
@@ -164,6 +164,27 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
           <label htmlFor="agree" className="inline">
             I agree to the terms and conditions
           </label>
+          <p className="text-xs text-gray-600 my-4">
+            Read our{" "}
+            <a
+              href="https://thelaundryhubsf.com/prvacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-600"
+            >
+              Privacy Policy
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://thelaundryhubsf.com/term-conditions"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-600"
+            >
+              Terms & Conditions
+            </a>
+            .
+          </p>
           {showError && !agree && (
             <p className="text-red-500 text-xs mt-1">
               You must agree to the terms and conditions to continue.
