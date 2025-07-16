@@ -63,14 +63,17 @@ const StepZeroForm = ({
         >
           <span className="text-red-500">*</span> Select type of service
         </label>
-        <div className="flex gap-4 justify-center mb-1" id="selectService">
+        <div
+          id="selectService"
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-1"
+        >
           {(["premium", "basic"] as const).map((svc) => (
             <button
               key={svc}
               type="button"
               aria-pressed={selectedService === svc}
               onClick={() => setValue("laundryType", svc)}
-              className={`w-1/2 border rounded-md p-3 text-center transition
+              className={`border rounded-md p-3 text-center transition
                 ${
                   selectedService === svc
                     ? "border-blue-500 bg-blue-50"
@@ -114,9 +117,9 @@ const StepZeroForm = ({
       </div>
 
       {/* Date & time-slot picker */}
-      <div className="text-gray-600 pt-4 flex gap-3">
+      <div className="text-gray-600 pt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Date picker */}
-        <div className="w-1/2">
+        <div>
           <label
             htmlFor="dropOffDate"
             className="block text-sm font-medium text-gray-800 mb-1"
@@ -132,7 +135,7 @@ const StepZeroForm = ({
         </div>
 
         {/* Time slots */}
-        <div className="w-1/2">
+        <div>
           <label
             htmlFor="timeSlot"
             className="block text-sm font-medium text-gray-800 mb-1"

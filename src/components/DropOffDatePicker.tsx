@@ -22,7 +22,7 @@ export default function DropOffDatePicker({
   const isWeekday = (d: Date) => d.getDay() !== 0 && d.getDay() !== 6;
 
   return (
-    <div className="relative max-w-sm mx-auto">
+    <div className="relative">
       <FiCalendar className="absolute z-10 left-3 top-3 pointer-events-none text-gray-400" />
       <DatePicker
         id={inputId}
