@@ -1,10 +1,16 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import CustomerForm from "./components/CustomerForm";
 import Login from "./components/Login";
 import AdminDashboard from "./components/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Helmet } from "react-helmet";
 import { AuthProvider } from "./context/AuthContext";
+import RafflePage from "./components/RafflePage";
 
 const NotFound = () => (
   <>
@@ -30,8 +36,10 @@ const App = () => {
           />
         </Helmet>
         <Routes>
+          <Route path="/" element={<Navigate to="/form" replace />} />
           <Route path="/form" element={<CustomerForm />} />
-          <Route path="/authenticate" element={<Login />} />
+          <Route path="/raffle" element={<RafflePage />} />
+          <Route path="/admin" element={<Login />} />
           <Route
             path="/dashboard"
             element={
