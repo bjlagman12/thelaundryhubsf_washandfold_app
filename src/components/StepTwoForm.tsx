@@ -38,15 +38,29 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
     return value.toString();
   };
 
-  const [showError, setShowError] = React.useState(false);
+  const [showTermsError, setShowTermsError] = React.useState(false);
   const [showTerms, setShowTerms] = React.useState(false);
+  const [smsConsent, setSmsConsent] = React.useState(false);
+  const [showSmsError, setShowSmsError] = React.useState(false);
 
   const onSubmit = (data: OrderForm) => {
-    if (!agree) {
-      setShowError(true);
-      return;
+    let valid = true;
+
+    if (!smsConsent) {
+      setShowSmsError(true);
+      valid = false;
+    } else {
+      setShowSmsError(false);
     }
-    setShowError(false);
+
+    if (!agree) {
+      setShowTermsError(true);
+      valid = false;
+    } else {
+      setShowTermsError(false);
+    }
+
+    if (!valid) return;
     handleFormSubmit(data);
   };
 
@@ -68,6 +82,31 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
               </li>
             ))}
         </ul>
+
+        <div className="mb-4  text-sm">
+          <p className="my-4">
+            <strong>Consent &amp; SMS Updates:</strong> By checking this box,
+            you consent to receive SMS updates related to your laundry order
+            (approximately 1–3 messages per order; message &amp; data rates may
+            apply; reply STOP to unsubscribe), including order confirmations,
+            pickup notifications, and refund alerts.
+          </p>
+          <input
+            id="smsConsent"
+            type="checkbox"
+            className="form-checkbox mr-2 mt-1"
+            checked={smsConsent}
+            onChange={(e) => setSmsConsent(e.target.checked)}
+          />
+          <label htmlFor="smsConsent" className="inline">
+            I consent to receive SMS updates
+          </label>
+          {showSmsError && (
+            <p className="text-red-500 text-xs mt-1">
+              You must opt in to SMS updates to continue.
+            </p>
+          )}
+        </div>
 
         {/* 1) Collapsible Terms & Conditions */}
         <div className="mb-4 border border-blue-300 rounded overflow-hidden">
@@ -146,14 +185,6 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
         </div>
 
         <div className="mb-4 text-sm">
-          <p className="my-4">
-            <strong>SMS Updates: </strong>
-            By checking this box, you agree to The Laundry Hub SF's Terms &
-            Conditions and consent to receive SMS updates related to your
-            laundry order, including order confirmations, pickup notifications,
-            and refund alerts. Message & data rates may apply. Reply STOP to
-            unsubscribe.
-          </p>
           <input
             id="agree"
             type="checkbox"
@@ -162,12 +193,18 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
             onChange={(e) => setAgree(e.target.checked)}
           />
           <label htmlFor="agree" className="inline">
-            I agree to the terms and conditions
+            I agree to The Laundry Hub SF's Terms and Conditions and Privacy
+            Policy
           </label>
+          {showTermsError && !agree && (
+            <p className="text-red-500 text-xs mt-1">
+              You must agree to the terms and conditions to continue.
+            </p>
+          )}
           <p className="text-xs text-gray-600 my-4">
             Read our{" "}
             <a
-              href="https://thelaundryhubsf.com/prvacy-policy"
+              href="https://thelaundryhubsf.com/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
               className="underline text-blue-600"
@@ -185,11 +222,6 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
             </a>
             .
           </p>
-          {showError && !agree && (
-            <p className="text-red-500 text-xs mt-1">
-              You must agree to the terms and conditions to continue.
-            </p>
-          )}
         </div>
         <div className="flex justify-between">
           <button
