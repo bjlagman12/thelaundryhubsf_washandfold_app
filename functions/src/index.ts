@@ -42,12 +42,31 @@ export const sendSmsOnOrder = onDocumentCreated(
 
     const client = twilio(TWILIO_SID.value(), TWILIO_TOKEN.value());
 
-    const message = `🌀 Hi ${order.firstName}, your order #${order.orderId} was received by The Laundry Hub SF! We’ll text you when it’s ready for pickup.`;
+    const customerMessage = `🌀 Hi ${order.firstName}, your order #${order.orderId} was received by The Laundry Hub SF! We’ll text you when it’s ready for pickup.`;
 
-    return client.messages.create({
-      body: message,
+    const ownerMessage = `📥 New Order Received:
+- Name: ${order.firstName} ${order.lastName}
+- Order ID: ${order.orderId}
+- Phone: ${order.phone}
+- Service Type: ${order.serviceType}
+- Dropoff Date: ${new Date(order.dropOffDate)}
+- specialRequests: ${order.specialRequests || "N/A"}`;
+
+    const customerSend = client.messages.create({
+      body: customerMessage,
       to: order.phone,
       from: TWILIO_PHONE.value(),
     });
+
+    const ownerPhones = ["+15109253180"];
+    const ownerSends = ownerPhones.map((ownerPhone) =>
+      client.messages.create({
+        body: ownerMessage,
+        to: ownerPhone,
+        from: TWILIO_PHONE.value(),
+      })
+    );
+
+    await Promise.all([customerSend, ...ownerSends]);
   }
 );

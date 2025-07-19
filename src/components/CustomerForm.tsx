@@ -23,6 +23,7 @@ export type OrderForm = {
   specialRequests: string;
   orderId?: string;
   notes?: string;
+  serviceType: string;
 };
 
 const CustomerForm: React.FC = () => {
@@ -50,6 +51,7 @@ const CustomerForm: React.FC = () => {
       specialRequests: "",
       orderId: "",
       notes: "",
+      serviceType: "",
     },
   });
 

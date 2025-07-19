@@ -42,8 +42,9 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
   const [showTerms, setShowTerms] = React.useState(false);
   const [smsConsent, setSmsConsent] = React.useState(false);
   const [showSmsError, setShowSmsError] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
-  const onSubmit = (data: OrderForm) => {
+  const onSubmit = async (data: OrderForm) => {
     let valid = true;
 
     if (!smsConsent) {
@@ -61,7 +62,13 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
     }
 
     if (!valid) return;
-    handleFormSubmit(data);
+
+    setLoading(true);
+    try {
+      await handleFormSubmit(data); // Ensure this returns a Promise
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -233,9 +240,36 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
           </button>
           <button
             type="submit"
-            className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
+            className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 flex items-center"
+            disabled={loading}
           >
-            Submit
+            {loading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 00-8 8z"
+                  ></path>
+                </svg>
+                Submitting...
+              </>
+            ) : (
+              "Submit"
+            )}
           </button>
         </div>
       </form>

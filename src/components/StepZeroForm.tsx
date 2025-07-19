@@ -26,7 +26,7 @@ const StepZeroForm = ({
   setValue,
   watch,
 }: StepZeroProps) => {
-  const selectedService = watch("laundryType");
+  const selectedService = watch("serviceType");
   const slot = watch("timeSlot");
   const dateValue = watch("dropOffDate");
   const date = dateValue ? new Date(dateValue) : null;
@@ -72,7 +72,7 @@ const StepZeroForm = ({
               key={svc}
               type="button"
               aria-pressed={selectedService === svc}
-              onClick={() => setValue("laundryType", svc)}
+              onClick={() => setValue("serviceType", svc)}
               className={`border rounded-md p-3 text-center transition
                 ${
                   selectedService === svc
@@ -109,9 +109,9 @@ const StepZeroForm = ({
             </button>
           ))}
         </div>
-        {errors.laundryType && (
+        {errors.serviceType && (
           <p className="text-red-500 text-sm m-1">
-            {errors.laundryType.message}
+            {errors.serviceType.message}
           </p>
         )}
       </div>
@@ -167,7 +167,7 @@ const StepZeroForm = ({
       {/* Hidden inputs feed RHF */}
       <input
         type="hidden"
-        {...register("laundryType", { required: "Please select a service." })}
+        {...register("serviceType", { required: "Please select a service." })}
         value={selectedService || ""}
       />
       <input
