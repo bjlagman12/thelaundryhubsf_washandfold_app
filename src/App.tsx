@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { Helmet } from "react-helmet";
 import { AuthProvider } from "./context/AuthContext";
 import RafflePage from "./components/RafflePage";
+import MaterialHours from "./components/MaterialHours";
 
 const NotFound = () => (
   <>
@@ -39,6 +40,7 @@ const App = () => {
           <Route path="/" element={<Navigate to="/form" replace />} />
           <Route path="/form" element={<CustomerForm />} />
           <Route path="/raffle" element={<RafflePage />} />
+          <Route path="/material-hours" element={<MaterialHours />} />
           <Route path="/admin" element={<Login />} />
           <Route
             path="/dashboard"
