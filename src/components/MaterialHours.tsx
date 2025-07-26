@@ -13,8 +13,9 @@ export default function MaterialHoursForm() {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting, isSubmitSuccessful },
-  } = useForm({
+  } = useForm<MaterialHoursFormData>({
     defaultValues: {
       who: "Brian",
       date: new Date().toISOString().slice(0, 10),
@@ -23,6 +24,9 @@ export default function MaterialHoursForm() {
       file: null,
     },
   });
+
+  // watch file input to display its name
+  const fileList = watch("file");
 
   const onSubmit = async (data: MaterialHoursFormData) => {
     // build FormData for both text + binary
@@ -36,15 +40,19 @@ export default function MaterialHoursForm() {
     }
 
     try {
-      const res = await fetch(
-        "http://localhost:5678/webhook-test/timesheet-entry",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const res = await fetch(import.meta.env.VITE_N8N_WEBHOOK_URL, {
+        method: "POST",
+        body: formData,
+      });
       if (!res.ok) throw new Error(await res.text());
-      reset({ description: "", hours: "", file: null });
+      // clear only description, hours, and file; keep who & date
+      reset({
+        who: data.who,
+        date: data.date,
+        description: "",
+        hours: "",
+        file: null,
+      });
     } catch (err) {
       console.error(err);
       alert("Submission failed. See console for details.");
@@ -70,12 +78,17 @@ export default function MaterialHoursForm() {
               </label>
               <select
                 id="who"
-                {...register("who", { required: true })}
+                {...register("who", { required: "Please select a user." })}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option>Brian</option>
-                <option>John</option>
+                <option value="Brian">Brian</option>
+                <option value="Jon">Jon</option>
               </select>
+              {errors.who && (
+                <p className="text-red-600 text-sm mt-1">
+                  {errors.who.message}
+                </p>
+              )}
             </div>
 
             {/* Date */}
@@ -89,9 +102,14 @@ export default function MaterialHoursForm() {
               <input
                 type="date"
                 id="date"
-                {...register("date", { required: true })}
+                {...register("date", { required: "Please choose a date." })}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
               />
+              {errors.date && (
+                <p className="text-red-600 text-sm mt-1">
+                  {errors.date.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -106,12 +124,14 @@ export default function MaterialHoursForm() {
             <textarea
               id="description"
               rows={3}
-              {...register("description", { required: true })}
+              {...register("description", { required: "Required" })}
               placeholder="What did you do?"
               className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
             />
             {errors.description && (
-              <p className="text-red-600 text-sm mt-1">Required</p>
+              <p className="text-red-600 text-sm mt-1">
+                {errors.description.message}
+              </p>
             )}
           </div>
 
@@ -129,7 +149,7 @@ export default function MaterialHoursForm() {
                 id="hours"
                 step="0.1"
                 {...register("hours", {
-                  required: true,
+                  required: "Required",
                   min: { value: 0, message: "Must be ≥ 0" },
                 })}
                 placeholder="0.0"
@@ -137,7 +157,7 @@ export default function MaterialHoursForm() {
               />
               {errors.hours && (
                 <p className="text-red-600 text-sm mt-1">
-                  {errors.hours.message || "Required"}
+                  {errors.hours.message}
                 </p>
               )}
             </div>
@@ -154,7 +174,9 @@ export default function MaterialHoursForm() {
                 htmlFor="file"
                 className="flex items-center justify-center h-24 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-500 hover:bg-blue-50 text-gray-500 text-sm transition"
               >
-                Upload here
+                {fileList && fileList.length > 0
+                  ? fileList[0].name
+                  : "Upload here"}
                 <input
                   type="file"
                   id="file"
