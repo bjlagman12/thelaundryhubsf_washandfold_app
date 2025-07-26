@@ -181,7 +181,6 @@ export default function MaterialHoursForm() {
                   type="file"
                   id="file"
                   accept="image/*"
-                  capture="environment"
                   {...register("file")}
                   className="hidden"
                 />
