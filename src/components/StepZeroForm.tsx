@@ -27,9 +27,40 @@ const StepZeroForm = ({
   watch,
 }: StepZeroProps) => {
   const selectedService = watch("serviceType");
+  const selectedDelivery = watch("selectDelivery");
   const slot = watch("timeSlot");
   const dateValue = watch("dropOffDate");
   const date = dateValue ? new Date(dateValue) : null;
+
+  const availableServices =
+    selectedDelivery === "Pickup & Delivery"
+      ? (["premium"] as const)
+      : selectedDelivery === "Drop-off"
+      ? (["premium", "basic"] as const)
+      : ([] as const);
+
+  const handleSelectDelivery = (choice: "Pickup & Delivery" | "Drop-off") => {
+    setValue("selectDelivery", choice, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+
+    // If switching to Pickup & Delivery and user had "basic" selected, clear it.
+    if (choice === "Pickup & Delivery" && selectedService === "basic") {
+      setValue("serviceType", "", { shouldDirty: true, shouldValidate: true });
+    }
+    // If switching delivery at all, validate serviceType again
+    if (
+      choice === "Drop-off" &&
+      !["premium", "basic"].includes(selectedService)
+    ) {
+      setValue("serviceType", "", { shouldDirty: true, shouldValidate: true });
+    }
+  };
+
+  const handleSelectService = (svc: "premium" | "basic") => {
+    setValue("serviceType", svc, { shouldDirty: true, shouldValidate: true });
+  };
 
   return (
     <form
@@ -38,81 +69,171 @@ const StepZeroForm = ({
       aria-labelledby="stepzero-heading"
     >
       <h2 id="stepzero-heading" className="text-xl font-semibold">
-        Schedule a Drop-Off
+        Schedule a Wash and Fold Laundry Service
       </h2>
       <p className="text-m text-gray-700 mb-5">
-        <strong>How it works:</strong> Drop off your laundry at your scheduled
-        time. We wash, dry, and fold it with care. Ready for pickup in 48 hours.
-        For more details on our services, please{" "}
+        <strong>How it works:</strong> Choose Drop-off or Pickup &amp; Delivery.
+        We sort, wash, dry, and (for Premium) neatly fold your laundry with
+        care. Most orders are ready within 48 hours.{" "}
+        <span className="whitespace-nowrap">20 lb minimum.</span> For more
+        details, please{" "}
         <a
-          href="https://thelaundryhubsf.com/services#wash-fold"
+          href="https://thelaundryhubsf.com/wash-and-fold-laundry-san-francisco"
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 no-underline hover:underline transition"
         >
-          read our service details
+          read our Wash &amp; Fold details
         </a>
         .
       </p>
 
-      {/* Service selector */}
-      <div>
-        <label
-          htmlFor="selectService"
-          className="block text-sm font-medium text-gray-800 mb-1"
-        >
-          <span className="text-red-500">*</span> Select type of service
-        </label>
-        <div
-          id="selectService"
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-1"
-        >
-          {(["premium", "basic"] as const).map((svc) => (
-            <button
-              key={svc}
-              type="button"
-              aria-pressed={selectedService === svc}
-              onClick={() => setValue("serviceType", svc)}
-              className={`border rounded-md p-3 text-center transition
-                ${
-                  selectedService === svc
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-300 hover:bg-gray-100"
-                }
-              `}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold">
-                  {svc[0].toUpperCase() + svc.slice(1)}
-                </h3>
-                <div className="p-1 rounded-md text-m font-semibold text-gray-600">
-                  {svc === "premium" ? "$1.99 / lb" : "$1.19 / lb"}
-                </div>
-              </div>
-              <ul className="text-sm text-gray-600 text-left list-disc pl-3">
-                {svc === "premium" ? (
-                  <>
-                    <li>Neatly folded & bagged</li>
-                    <li>48-hour turnaround</li>
-                    <li>Ready to put away</li>
-                  </>
-                ) : (
-                  <>
-                    <li>Freshly cleaned</li>
-                    <li>
-                      Bagged only <strong>No Folding</strong>
-                    </li>
-                    <li>Budget-friendly option</li>
-                  </>
-                )}
-              </ul>
-            </button>
-          ))}
+      {/* Pickup & Delivery or Dropoff */}
+      <div className="space-y-6">
+        {/* Hidden inputs so RHF tracks these fields (we set them via setValue) */}
+        <input
+          type="hidden"
+          {...register("selectDelivery", {
+            required: "Please select a delivery type.",
+          })}
+        />
+        <input
+          type="hidden"
+          {...register("serviceType", {
+            validate: (v) => {
+              if (!selectedDelivery) return true; // not required until delivery chosen
+              return v ? true : "Please select a service type.";
+            },
+          })}
+        />
+
+        {/* Pickup & Delivery or Drop-off */}
+        <div>
+          <label
+            htmlFor="selectDelivery"
+            className="block text-sm font-medium text-gray-800 mb-1"
+          >
+            <span className="text-red-500">*</span> Select delivery type
+          </label>
+
+          <div
+            id="selectDelivery"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-1"
+          >
+            {(["Pickup & Delivery", "Drop-off"] as const).map((choice) => {
+              const pressed = selectedDelivery === choice;
+              return (
+                <button
+                  key={choice}
+                  type="button"
+                  aria-pressed={pressed}
+                  onClick={() => handleSelectDelivery(choice)}
+                  className={`border rounded-md p-3 text-left transition ${
+                    pressed
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300 hover:bg-gray-100"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">{choice}</h3>
+                  </div>
+                  <ul className="text-sm text-gray-600 list-disc pl-4">
+                    {choice === "Pickup & Delivery" ? (
+                      <>
+                        <li>Door-to-door convenience</li>
+                        <li>Text updates</li>
+                        <li>Premium service only</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>Quick counter drop-off</li>
+                        <li>Flexible turnaround</li>
+                        <li>Premium or Basic available</li>
+                      </>
+                    )}
+                  </ul>
+                </button>
+              );
+            })}
+          </div>
+
+          {errors.selectDelivery && (
+            <p className="text-red-500 text-sm m-1">
+              {String(errors.selectDelivery.message)}
+            </p>
+          )}
         </div>
-        {errors.serviceType && (
-          <p className="text-red-500 text-sm m-1">
-            {errors.serviceType.message}
-          </p>
+
+        {/* Service selector (only shows after delivery is selected) */}
+        {selectedDelivery && (
+          <div>
+            <label
+              htmlFor="selectService"
+              className="block text-sm font-medium text-gray-800 mb-1"
+            >
+              <span className="text-red-500">*</span> Select type of service
+            </label>
+
+            {/* Min weight note */}
+            <p className="text-xs text-gray-600 mb-2">* 20 LB minimum</p>
+
+            <div
+              id="selectService"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-1"
+            >
+              {availableServices.map((svc) => {
+                const pressed = selectedService === svc;
+
+                // Pricing by delivery type
+                const price =
+                  svc === "premium"
+                    ? selectedDelivery === "Pickup & Delivery"
+                      ? "$2.39 / lb" // (planned: $2.49 / lb)
+                      : "$1.99 / lb"
+                    : "$1.75 / lb"; // basic (drop-off only)
+
+                return (
+                  <button
+                    key={svc}
+                    type="button"
+                    aria-pressed={pressed}
+                    onClick={() => handleSelectService(svc)}
+                    className={`border rounded-md p-3 text-left transition ${
+                      pressed
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-300 hover:bg-gray-100"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold">
+                        {svc[0].toUpperCase() + svc.slice(1)}
+                      </h3>
+                      <div className="p-1 rounded-md text-sm font-semibold text-gray-600">
+                        {price}
+                      </div>
+                    </div>
+                    <ul className="text-sm text-gray-600 list-disc pl-4">
+                      {svc === "premium" ? (
+                        <>
+                          <li>Professionally sorted & washed</li>
+                          <li>Dried, neatly folded & bagged</li>
+                          <li>Ready to put away</li>
+                        </>
+                      ) : (
+                        <>
+                          <li>Freshly cleaned</li>
+                          <li>
+                            Bagged only — <strong>No folding</strong>
+                          </li>
+                          <li>Budget-friendly</li>
+                        </>
+                      )}
+                    </ul>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         )}
       </div>
 

@@ -23,7 +23,8 @@ export type OrderForm = {
   specialRequests: string;
   orderId?: string;
   notes?: string;
-  serviceType: string;
+  serviceType: "" | "basic" | "premium";
+  selectDelivery: "" | "Pickup & Delivery" | "Drop-off";
 };
 
 const CustomerForm: React.FC = () => {
@@ -52,8 +53,11 @@ const CustomerForm: React.FC = () => {
       orderId: "",
       notes: "",
       serviceType: "",
+      selectDelivery: "",
     },
   });
+
+  const deliveryType = watch("selectDelivery");
 
   useEffect(() => {
     // This effect is not used for SEO, but left for your time slot logic
@@ -128,9 +132,6 @@ const CustomerForm: React.FC = () => {
               <h1 id="main-heading" className="text-xl font-bold text-gray-800">
                 THE LAUNDRY HUB SF
               </h1>
-              <h2 className="text-lg text-gray-700 font-semibold">
-                Wash & Fold Service
-              </h2>
             </div>
           </header>
 
@@ -138,7 +139,7 @@ const CustomerForm: React.FC = () => {
           {step === 0 && (
             <section aria-labelledby="step-0-heading">
               <h2 id="step-0-heading" className="sr-only">
-                Schedule Drop-Off
+                Schedule Wash & Fold Laundry Service
               </h2>
               <StepZeroForm
                 register={register}
@@ -187,7 +188,10 @@ const CustomerForm: React.FC = () => {
               <h2 id="step-3-heading" className="sr-only">
                 Thank You
               </h2>
-              <StepThreeForm orderId={orderId} />
+              <StepThreeForm
+                orderId={orderId}
+                deliveryType={deliveryType as "Pickup & Delivery" | "Drop-off"}
+              />
             </section>
           )}
         </section>

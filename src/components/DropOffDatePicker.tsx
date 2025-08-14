@@ -31,6 +31,7 @@ export default function DropOffDatePicker({
         minDate={tomorrow}
         filterDate={isWeekday}
         dateFormat="MMMM d, yyyy"
+        autoComplete="off"
         placeholderText="Choose date"
         className={`w-full pl-10 pr-3 py-2 border rounded-md transition
           ${

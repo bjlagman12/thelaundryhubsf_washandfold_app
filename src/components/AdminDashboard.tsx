@@ -103,7 +103,7 @@ const AdminDashboard = () => {
 
   const handleSignOut = async () => {
     await signOut(getAuth(app));
-    window.location.href = "/authenticate";
+    window.location.href = "/admin";
   };
 
   useEffect(() => {
