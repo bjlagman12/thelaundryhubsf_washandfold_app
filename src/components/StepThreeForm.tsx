@@ -36,9 +36,16 @@ const StepThreeForm: React.FC<StepThreeFormProps> = ({
 
       <div className="text-gray-600 text-sm">
         <p className="my-2">
-          ✅ Please place your laundry in a tied plastic bag.
+          🧺 Please place your laundry in a securely tied plastic bag.
         </p>
-        <p className="my-2">🚫 No baskets, hampers, or loose items.</p>
+        <p className="my-2">
+          📦 Leave your bagged laundry on the front porch, clearly visible for
+          the driver.
+        </p>
+        <p className="my-2">
+          🚫 Do not use baskets, hampers, or open containers—this helps prevent
+          items from being lost in transit.
+        </p>
 
         {isPickup ? (
           <div className="my-2">
