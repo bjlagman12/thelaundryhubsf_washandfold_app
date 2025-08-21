@@ -30,7 +30,10 @@ const RafflePage: React.FC = () => {
         ...data,
         createdAt: serverTimestamp(),
       });
-      reset();
+      reset(
+        { smsConsent: false }, // values you want after reset
+        { keepIsSubmitted: true, keepIsSubmitSuccessful: true }
+      );
     } catch (err) {
       console.error("Raffle entry failed:", err);
       alert("Sorry, something went wrong. Please try again.");
