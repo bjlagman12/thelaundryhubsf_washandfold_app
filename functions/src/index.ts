@@ -27,10 +27,32 @@ export const sendSmsOnOrder = onDocumentCreated(
 
     const ownerMessage = `📥 New Order Received:
 - Name: ${order.firstName} ${order.lastName}
+- New Customer: ${order.newCustomer ? "Yes" : "No"}
 - Order ID: ${order.orderId}
 - Phone: ${order.phone}
+- Pickup/Drop-off: ${order.deliveryType}
 - Service Type: ${order.serviceType}
-- Dropoff Date: ${new Date(order.dropOffDate)}
+- Drop-off/ Pick-up Date: ${new Date(order.dropOffDate).toLocaleDateString(
+      "en-US",
+      {
+        month: "long",
+        day: "2-digit",
+        year: "numeric",
+      }
+    )}
+- Time: ${new Date(order.dropOffTime).toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })}
+- Address: ${
+      order.deliveryType === "Pickup & Delivery"
+        ? `${order.addressLine1} ${order.addressLine2 || ""}, ${order.city}, ${
+            order.state
+          } ${order.zip}`
+        : "N/A"
+    }
+  
 - specialRequests: ${order.specialRequests || "N/A"}`;
 
     const customerSend = client.messages.create({
@@ -47,6 +69,8 @@ export const sendSmsOnOrder = onDocumentCreated(
         from: TWILIO_PHONE.value(),
       })
     );
+
+    console.log("ownerMessage", ownerMessage);
 
     await Promise.all([customerSend, ...ownerSends]);
   }

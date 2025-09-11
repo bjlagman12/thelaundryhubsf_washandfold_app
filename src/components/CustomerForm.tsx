@@ -25,6 +25,18 @@ export type OrderForm = {
   notes?: string;
   serviceType: "" | "basic" | "premium";
   selectDelivery: "" | "Pickup & Delivery" | "Drop-off";
+
+  // NEW (applies to both flows)
+  newCustomer?: boolean;
+  promoCode?: string;
+  promoValid?: boolean;
+
+  // NEW (pickup & delivery only)
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
 };
 
 const CustomerForm: React.FC = () => {
@@ -38,6 +50,8 @@ const CustomerForm: React.FC = () => {
     getValues,
     setValue,
     watch,
+    clearErrors,
+    setError,
     formState: { errors },
   } = useForm<OrderForm>({
     defaultValues: {
@@ -54,10 +68,24 @@ const CustomerForm: React.FC = () => {
       notes: "",
       serviceType: "",
       selectDelivery: "",
+
+      newCustomer: false,
+      promoCode: "",
+      promoValid: false,
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      state: "CA",
+      zip: "",
     },
   });
 
   const deliveryType = watch("selectDelivery");
+
+  const isPickupDelivery = deliveryType === "Pickup & Delivery";
+
+  // Example: codes are case-insensitive
+  const promoCodes = ["HAPPYLAUNDRY2025"];
 
   useEffect(() => {
     // This effect is not used for SEO, but left for your time slot logic
@@ -163,6 +191,12 @@ const CustomerForm: React.FC = () => {
                 errors={errors}
                 onNext={handleNext}
                 onBack={() => setStep(0)}
+                setValue={setValue}
+                watch={watch}
+                clearErrors={clearErrors}
+                setError={setError}
+                isPickupDelivery={isPickupDelivery}
+                promoCodes={promoCodes}
               />
             </section>
           )}

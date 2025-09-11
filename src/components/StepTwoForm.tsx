@@ -83,11 +83,15 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
         <ul className="text-md text-gray-700 space-y-1 mb-4">
           {Object.entries(getValues())
             .slice(0, -2)
-            .map(([key, value]) => (
-              <li key={key}>
-                <strong>{startCase(key)}:</strong> {formatValue(value)}
-              </li>
-            ))}
+            .map(([key, value]) => {
+              if (key === "orderId" || key === "notes") return null;
+
+              return (
+                <li key={key}>
+                  <strong>{startCase(key)}:</strong> {formatValue(value)}
+                </li>
+              );
+            })}
         </ul>
 
         <div className="mb-4  text-sm">

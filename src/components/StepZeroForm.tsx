@@ -175,7 +175,7 @@ const StepZeroForm = ({
             </label>
 
             {/* Min weight note */}
-            <p className="text-xs text-gray-600 mb-2">* 20 LB minimum</p>
+            <p className="text-sm text-gray-600 mb-2">* 20 LB minimum</p>
 
             <div
               id="selectService"
@@ -245,13 +245,16 @@ const StepZeroForm = ({
             htmlFor="dropOffDate"
             className="block text-sm font-medium text-gray-800 mb-1"
           >
-            <span className="text-red-500">*</span> Select day
+            <span className="text-red-500">*</span> Select{" "}
+            {selectedDelivery === "Pickup & Delivery" ? "pickup" : "drop-off"}{" "}
+            day
           </label>
           <DropOffDatePicker
             date={date}
             setDate={(d) => setValue("dropOffDate", d ? d.toISOString() : "")}
             error={errors.dropOffDate?.message}
             inputId="dropOffDate"
+            pickupOnly={selectedDelivery === "Pickup & Delivery"}
           />
         </div>
 
@@ -261,8 +264,11 @@ const StepZeroForm = ({
             htmlFor="timeSlot"
             className="block text-sm font-medium text-gray-800 mb-1"
           >
-            <span className="text-red-500">*</span> Select time
+            <span className="text-red-500">*</span>Select{" "}
+            {selectedDelivery === "Pickup & Delivery" ? "pickup" : "drop-off"}{" "}
+            time
           </label>
+
           <select
             id="timeSlot"
             {...register("timeSlot", {
@@ -275,10 +281,17 @@ const StepZeroForm = ({
             }`}
             aria-placeholder="Select a drop off time"
           >
-            <option value="">Select a drop off time</option>
-            <option value="12:00 PM - 02:00 PM">12:00 PM - 02:00 PM</option>
-            <option value="07:00 PM - 09:00 PM">07:00 PM - 09:00 PM</option>
+            <option value="">Select a time slot</option>
+            {selectedDelivery === "Pickup & Delivery" ? (
+              <option value="08:00 AM - 12:00 AM">09:00 AM - 11:00 AM</option>
+            ) : (
+              <>
+                <option value="12:00 PM - 02:00 PM">12:00 PM - 02:00 PM</option>
+                <option value="07:00 PM - 09:00 PM">07:00 PM - 09:00 PM</option>
+              </>
+            )}
           </select>
+
           {errors.timeSlot && (
             <p className="text-red-500 text-sm">{errors.timeSlot.message}</p>
           )}
@@ -294,7 +307,7 @@ const StepZeroForm = ({
       <input
         type="hidden"
         {...register("dropOffDate", {
-          required: "Please pick a drop-off date.",
+          required: "Please pick a date.",
         })}
         value={date?.toISOString() || ""}
       />
