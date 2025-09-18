@@ -85,7 +85,7 @@ const CustomerForm: React.FC = () => {
   const isPickupDelivery = deliveryType === "Pickup & Delivery";
 
   // Example: codes are case-insensitive
-  const promoCodes = ["HAPPYLAUNDRY2025"];
+  const promoCodes = ["SAVETIME2025", "RosePro2025", "DILIA2025"];
 
   useEffect(() => {
     // This effect is not used for SEO, but left for your time slot logic

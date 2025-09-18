@@ -86,6 +86,9 @@ const StepZeroForm = ({
           read our Wash &amp; Fold details
         </a>
         .
+        <div className="mt-2 text-sm font-semibold text-red-500">
+          Need help completing the form? Call or text us at {"(510) 925-3180 "}
+        </div>
       </p>
 
       {/* Pickup & Delivery or Dropoff */}
