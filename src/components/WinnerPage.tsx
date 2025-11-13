@@ -4,34 +4,34 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import LH from "../../public/LH.svg";
 import { Helmet } from "react-helmet";
-import { FaGoogle } from "react-icons/fa";
 
-type RaffleFormData = {
+type WinnerPageFormData = {
   name: string;
-  email?: string;
+  email: string;
   phone: string;
-  smsConsent: boolean;
+  guessWeight: string;
+  promoConsent: boolean;
 };
 
-const RafflePage: React.FC = () => {
+const WinnerPage: React.FC = () => {
   const {
     register,
     handleSubmit,
-
     formState: { errors, isSubmitting, isSubmitSuccessful },
     reset,
-  } = useForm<RaffleFormData>({
-    defaultValues: { smsConsent: false },
+  } = useForm<WinnerPageFormData>({
+    defaultValues: { promoConsent: false },
   });
 
-  const onSubmit: SubmitHandler<RaffleFormData> = async (data) => {
+  const onSubmit: SubmitHandler<WinnerPageFormData> = async (data) => {
     try {
-      await addDoc(collection(db, "raffle"), {
+      await addDoc(collection(db, "winner"), {
         ...data,
         createdAt: serverTimestamp(),
       });
+
       reset(
-        { smsConsent: false }, // values you want after reset
+        { promoConsent: false },
         { keepIsSubmitted: true, keepIsSubmitSuccessful: true }
       );
     } catch (err) {
@@ -43,10 +43,10 @@ const RafflePage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Enter Raffle | The Laundry Hub SF</title>
+        <title>Raffle Event | The Laundry Hub SF</title>
         <meta
           name="description"
-          content="Enter our raffle for a chance to win a free wash & fold at The Laundry Hub SF!"
+          content="Guess the bag weight and enter for a chance to win one month of free laundry at The Laundry Hub SF."
         />
       </Helmet>
 
@@ -72,83 +72,41 @@ const RafflePage: React.FC = () => {
                   THE LAUNDRY HUB SF
                 </h1>
                 <h2 className="text-lg text-gray-700 font-semibold">
-                  Raffle Entry
+                  Raffle Event Entry
                 </h2>
               </div>
             </a>
           </header>
 
           <h2 id="raffle-heading" className="sr-only">
-            Enter Our Raffle
+            Guess the bag weight raffle
           </h2>
+
           <div className="flex justify-center mb-6">
             <img
               src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjFoemI1djE2cjJrdDF5dmJ1bWtqcnNsamQwdGd0NnpibTZ3bGhqeSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/4RaPld0hPNRXEk1cfv/giphy.gif"
-              alt="$100 Money GIF"
+              alt="$300 Prize GIF"
               className="w-56 mx-auto"
             />
           </div>
 
-          {/* Intro blurb */}
-          <p className="mb-6 text-gray-700 text-lg">
-            <div>
-              🎉 Every month, one lucky winner takes home <strong>$100</strong>!
-              To qualify, just enter your name, phone number, and wash with us.
-              Good luck!
-            </div>
-            <br />
-            <ul className="text-gray-600 text-left">
-              <strong>Rules: Complete one of the following to qualify:</strong>
-              {/* <li>
-                <a
-                  href="https://www.facebook.com/people/The-Laundry-Hub-SF/61573774661069/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full border border-gray-300 rounded py-3 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-100 transition"
-                >
-                  <FaFacebook className="text-lg" />
-                  Like us on Facebook
-                </a>
-              </li> */}
-              {/* <li>
-                <a
-                  href="https://www.instagram.com/thelaundryhubsf/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full border border-gray-300 rounded py-3 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-100 transition"
-                >
-                  <FaInstagram className="text-lg" />
-                  Follow us on Instagram
-                </a>
-              </li> */}
-              {/* <li>
-                <a
-                  href="https://g.page/r/CV_RZYVb6InjEBM/review"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full border border-gray-300 rounded py-3 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-100 transition"
-                >
-                  <FaYelp className="text-lg" />
-                  Leave us a Yelp review
-                </a>
-              </li> */}
-              <li>
-                <a
-                  href="https://g.page/r/CV_RZYVb6InjEBM/review"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full border border-gray-300 rounded py-3 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-100 transition"
-                >
-                  <FaGoogle className="text-lg" />
-                  Leave us a Google review
-                </a>
-              </li>
+          {/* Intro */}
+          <div className="mb-6 text-gray-700 text-base text-lg">
+            <p className="mb-2">
+              🎉 Enter for a chance to win{" "}
+              <strong>one month of free laundry</strong> valued at{" "}
+              <strong>$300</strong>.
+            </p>
+            <p className="mb-1">All you have to do is:</p>
+            <ul className="list-disc list-inside text-gray-700 text-sm">
+              <li>Guess the weight of the laundry bag at our booth.</li>
+              <li>Fill out all fields below to enter.</li>
             </ul>
-          </p>
+          </div>
 
           {isSubmitSuccessful ? (
-            <div className="p-4 bg-green-50 border border-green-200 rounded mb-6">
-              🎉 Thanks for entering! Good luck!
+            <div className="p-4 bg-green-50 border border-green-200 rounded mb-6 text-sm">
+              🎉 Thanks for entering. Winner will be contacted after the event.
             </div>
           ) : (
             <form
@@ -186,7 +144,7 @@ const RafflePage: React.FC = () => {
                   htmlFor="phone"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  <span className="text-red-500">*</span> Phone
+                  <span className="text-red-500">*</span> Phone Number
                 </label>
                 <input
                   id="phone"
@@ -194,7 +152,7 @@ const RafflePage: React.FC = () => {
                     required: "Phone number is required.",
                     pattern: {
                       value: /\(?([0-9]{3})\)?[- ]?([0-9]{3})[- ]?([0-9]{4})$/,
-                      message: "Enter a valid 10-digit US phone number.",
+                      message: "Enter a valid 10 digit US phone number.",
                     },
                   })}
                   type="tel"
@@ -202,7 +160,7 @@ const RafflePage: React.FC = () => {
                     errors.phone ? "border-red-500" : "border-gray-300"
                   }`}
                   autoComplete="tel"
-                  placeholder="(415) 555-1234"
+                  placeholder="(628) 500-7801"
                 />
                 {errors.phone && (
                   <p className="text-red-500 text-xs mt-1">
@@ -211,17 +169,18 @@ const RafflePage: React.FC = () => {
                 )}
               </div>
 
-              {/* Email (optional but validated) */}
+              {/* Email (required) */}
               <div>
                 <label
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Email (optional)
+                  <span className="text-red-500">*</span> Email
                 </label>
                 <input
                   id="email"
                   {...register("email", {
+                    required: "Email is required.",
                     pattern: {
                       value: /^\S+@\S+\.\S+$/,
                       message: "Enter a valid email address.",
@@ -232,6 +191,7 @@ const RafflePage: React.FC = () => {
                     errors.email ? "border-red-500" : "border-gray-300"
                   }`}
                   autoComplete="email"
+                  placeholder="you@example.com"
                 />
                 {errors.email && (
                   <p className="text-red-500 text-xs mt-1">
@@ -240,48 +200,73 @@ const RafflePage: React.FC = () => {
                 )}
               </div>
 
-              {/* SMS Consent Checkbox */}
-              <div className="mb-4 text-sm">
-                <label htmlFor="smsConsent" className="inline-flex items-start">
+              {/* Guess Weight (required) */}
+              <div>
+                <label
+                  htmlFor="guessWeight"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  <span className="text-red-500">*</span> Your Guess of Bag
+                  Weight (in pounds)
+                </label>
+                <input
+                  id="guessWeight"
+                  {...register("guessWeight", {
+                    required: "Please enter your guess.",
+                    pattern: {
+                      value: /^[0-9]+(\.[0-9]+)?$/,
+                      message: "Enter a valid number in pounds.",
+                    },
+                  })}
+                  type="text"
+                  className={`w-full border rounded p-2 transition ${
+                    errors.guessWeight ? "border-red-500" : "border-gray-300"
+                  }`}
+                  placeholder="For example: 47.5"
+                />
+                {errors.guessWeight && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.guessWeight.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Promo Consent Checkbox (optional) */}
+              <div className="mb-2 text-xs">
+                <label
+                  htmlFor="promoConsent"
+                  className="inline-flex items-start"
+                >
                   <input
-                    id="smsConsent"
+                    id="promoConsent"
                     type="checkbox"
-                    {...register("smsConsent", {
-                      required:
-                        "You must agree to receive SMS marketing messages.",
-                    })}
-                    className="form-checkbox mr-2 mt-1"
+                    {...register("promoConsent")}
+                    className="form-checkbox mr-2 mt-0.5"
                   />
-                  <span>
-                    <strong>SMS Updates:</strong> By checking this box, you
-                    agree to The Laundry Hub SF’s
+                  <span className="text-gray-700">
+                    I agree to receive occasional promos and updates from The
+                    Laundry Hub SF. Message and data rates may apply. Reply STOP
+                    to unsubscribe. See our{" "}
                     <a
                       href="https://thelaundryhubsf.com/term-conditions"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="underline text-blue-600 mx-1"
+                      className="underline text-blue-600"
                     >
-                      Terms & Conditions
-                    </a>
-                    and
+                      Terms and Conditions
+                    </a>{" "}
+                    and{" "}
                     <a
                       href="https://thelaundryhubsf.com/privacy-policy"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="underline text-blue-600 mx-1"
+                      className="underline text-blue-600"
                     >
                       Privacy Policy
                     </a>
-                    and consent to receive SMS marketing messages, including
-                    promotional offers and updates. Message & data rates may
-                    apply. Reply STOP to unsubscribe.
+                    .
                   </span>
                 </label>
-                {errors.smsConsent && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.smsConsent.message}
-                  </p>
-                )}
               </div>
 
               {/* Submit */}
@@ -292,7 +277,7 @@ const RafflePage: React.FC = () => {
                   isSubmitting ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
-                {isSubmitting ? "Entering…" : "Enter Raffle"}
+                {isSubmitting ? "Submitting..." : "Enter Raffle"}
               </button>
             </form>
           )}
@@ -302,4 +287,4 @@ const RafflePage: React.FC = () => {
   );
 };
 
-export default RafflePage;
+export default WinnerPage;
