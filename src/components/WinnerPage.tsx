@@ -32,7 +32,7 @@ const WinnerPage: React.FC = () => {
 
       reset(
         { promoConsent: false },
-        { keepIsSubmitted: true, keepIsSubmitSuccessful: true }
+        { keepIsSubmitted: true, keepIsSubmitSuccessful: true },
       );
     } catch (err) {
       console.error("Raffle entry failed:", err);

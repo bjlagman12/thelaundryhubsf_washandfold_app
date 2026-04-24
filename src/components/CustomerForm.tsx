@@ -40,6 +40,10 @@ export type OrderForm = {
 };
 
 const CustomerForm: React.FC = () => {
+  useEffect(() => {
+    window.location.replace("https://thelaundryhubsf.com/");
+  }, []);
+
   const [step, setStep] = useState(0);
   const [orderId, setOrderId] = useState("");
   const [agree, setAgree] = useState(false);
