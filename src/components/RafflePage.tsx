@@ -4,7 +4,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import LH from "../../public/LH.svg";
 import { Helmet } from "react-helmet";
-import { FaGoogle } from "react-icons/fa";
+import { FaYelp } from "react-icons/fa";
 
 type RaffleFormData = {
   name: string;
@@ -121,9 +121,9 @@ const RafflePage: React.FC = () => {
                   Follow us on Instagram
                 </a>
               </li> */}
-              {/* <li>
+              <li>
                 <a
-                  href="https://g.page/r/CV_RZYVb6InjEBM/review"
+                  href="https://www.yelp.com/biz/the-laundry-hub-sf-san-francisco-3?utm_campaign=www_business_share_popup&utm_medium=copy_link&utm_source=(direct)"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full border border-gray-300 rounded py-3 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-100 transition"
@@ -131,8 +131,8 @@ const RafflePage: React.FC = () => {
                   <FaYelp className="text-lg" />
                   Leave us a Yelp review
                 </a>
-              </li> */}
-              <li>
+              </li>
+              {/* <li>
                 <a
                   href="https://g.page/r/CV_RZYVb6InjEBM/review"
                   target="_blank"
@@ -142,7 +142,7 @@ const RafflePage: React.FC = () => {
                   <FaGoogle className="text-lg" />
                   Leave us a Google review
                 </a>
-              </li>
+              </li> */}
             </ul>
           </p>
 
