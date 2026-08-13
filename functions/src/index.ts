@@ -6,6 +6,12 @@ import twilio from "twilio";
 admin.initializeApp();
 
 /* ===========================
+   Apify leads scrape → dedupe → n8n
+   (new)
+=========================== */
+export * from "./leadsScrape";
+
+/* ===========================
    Twilio (existing)
 =========================== */
 const TWILIO_SID = defineSecret("TWILIO_SID");

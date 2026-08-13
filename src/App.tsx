@@ -13,6 +13,8 @@ import { AuthProvider } from "./context/AuthContext";
 import RafflePage from "./components/RafflePage";
 import WinnerPage from "./components/WinnerPage";
 import MaterialHours from "./components/MaterialHours";
+import LeadsUpload from "./components/LeadsUpload";
+import LeadsSearch from "./components/LeadsSearch";
 
 const NotFound = () => (
   <>
@@ -43,6 +45,15 @@ const App = () => {
           <Route path="/raffle" element={<RafflePage />} />
           <Route path="/winner" element={<WinnerPage />} />
           <Route path="/material-hours" element={<MaterialHours />} />
+          <Route path="/leads-upload" element={<LeadsUpload />} />
+          <Route
+            path="/leads-search"
+            element={
+              <ProtectedRoute>
+                <LeadsSearch />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/admin" element={<Login />} />
           <Route
             path="/dashboard"

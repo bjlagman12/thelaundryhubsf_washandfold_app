@@ -5,7 +5,7 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-const uid = "nya47gfGzIR9k0sZhPtGHtLjb8k2";
+const uid = "HvzrG7gKtSWFtNxaYaokG4iq7Z83";
 
 admin
   .auth()
