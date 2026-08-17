@@ -1,14 +1,15 @@
-import React, { useCallback } from "react";
+import React from "react";
 import type {
   UseFormRegister,
   UseFormHandleSubmit,
   FieldErrors,
   UseFormSetValue,
   UseFormWatch,
-  UseFormClearErrors,
-  UseFormSetError,
 } from "react-hook-form";
 import type { OrderForm } from "./CustomerForm";
+import DropOffDatePicker from "./DropOffDatePicker";
+import { TIME_SLOTS_BY_DAY } from "../constants/dropOffSchedule";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface StepOneProps {
   register: UseFormRegister<OrderForm>;
@@ -18,10 +19,6 @@ interface StepOneProps {
   onBack: () => void;
   setValue: UseFormSetValue<OrderForm>;
   watch: UseFormWatch<OrderForm>;
-  clearErrors: UseFormClearErrors<OrderForm>;
-  setError: UseFormSetError<OrderForm>;
-  isPickupDelivery: boolean;
-  promoCodes: string[] | Record<string, unknown>;
 }
 
 const StepOneForm: React.FC<StepOneProps> = ({
@@ -32,28 +29,23 @@ const StepOneForm: React.FC<StepOneProps> = ({
   onBack,
   setValue,
   watch,
-  clearErrors,
-  setError,
-  isPickupDelivery,
-  promoCodes,
 }) => {
-  const promoList = Array.isArray(promoCodes)
-    ? promoCodes.map((c) => String(c).toUpperCase().trim())
-    : Object.keys(promoCodes).map((k) => k.toUpperCase().trim());
+  const slot = watch("timeSlot");
+  const dateValue = watch("dropOffDate");
+  const date = dateValue ? new Date(dateValue) : null;
+  const isWeekend = date ? date.getDay() === 0 || date.getDay() === 6 : false;
+  const availableSlots = date ? TIME_SLOTS_BY_DAY[date.getDay()] : [];
 
-  const onVerifyPromo = useCallback(() => {
-    const code = (watch("promoCode") || "").toUpperCase().trim();
-    const ok = code && promoList.includes(code);
-    setValue("promoValid", !!ok, { shouldDirty: true, shouldValidate: true });
-    if (ok) {
-      clearErrors("promoCode");
-    } else {
-      setError("promoCode", {
-        type: "validate",
-        message: "Invalid promo code",
-      });
+  const handleDateChange = (d: Date | null) => {
+    setValue("dropOffDate", d ? d.toISOString() : "", {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    const nextSlots = d ? TIME_SLOTS_BY_DAY[d.getDay()] : [];
+    if (!nextSlots.includes(slot)) {
+      setValue("timeSlot", "", { shouldDirty: true, shouldValidate: true });
     }
-  }, [watch, promoList, setValue, clearErrors, setError]);
+  };
 
   return (
     <section aria-labelledby="stepone-heading">
@@ -64,15 +56,12 @@ const StepOneForm: React.FC<StepOneProps> = ({
         >
           Your Information
         </h2>
-        {/* ✅ New customer (applies to both flows) */}
-        <div className="flex items-center gap-2 pt-2">
-          <input
-            id="newCustomer"
-            type="checkbox"
-            {...register("newCustomer")}
-          />
+
+        {/* New customer */}
+        <div className="flex items-center gap-2">
+          <input id="newCustomer" type="checkbox" {...register("newCustomer")} />
           <label htmlFor="newCustomer" className="text-sm text-gray-800">
-            I’m a new customer
+            I'm a new customer
           </label>
         </div>
 
@@ -96,7 +85,9 @@ const StepOneForm: React.FC<StepOneProps> = ({
               autoComplete="given-name"
             />
             {errors.firstName && (
-              <p className="text-red-500 text-xs">{errors.firstName.message}</p>
+              <p className="text-red-500 text-xs">
+                {errors.firstName.message}
+              </p>
             )}
           </div>
           <div className="w-1/2">
@@ -108,14 +99,18 @@ const StepOneForm: React.FC<StepOneProps> = ({
             </label>
             <input
               id="lastName"
-              {...register("lastName", { required: "Last Name is required." })}
+              {...register("lastName", {
+                required: "Last Name is required.",
+              })}
               type="text"
               className="w-full border border-gray-300 rounded p-2"
               aria-required="true"
               autoComplete="family-name"
             />
             {errors.lastName && (
-              <p className="text-red-500 text-xs">{errors.lastName.message}</p>
+              <p className="text-red-500 text-xs">
+                {errors.lastName.message}
+              </p>
             )}
           </div>
         </div>
@@ -174,33 +169,6 @@ const StepOneForm: React.FC<StepOneProps> = ({
           )}
         </div>
 
-        {/* Laundry Type */}
-        <div>
-          <label
-            htmlFor="laundryType"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            <span className="text-red-500">*</span> Type of Laundry
-          </label>
-          <select
-            id="laundryType"
-            {...register("laundryType", {
-              required: "Laundry Type is required.",
-            })}
-            className="w-full border border-gray-300 rounded p-2"
-            aria-required="true"
-          >
-            <option value="">Select an option</option>
-            <option value="mixed">Mixed (clothes + household)</option>
-            <option value="clothes">Clothes only</option>
-            <option value="bed_linen">Bed Linen</option>
-            <option value="towels">Towels</option>
-          </select>
-          {errors.laundryType && (
-            <p className="text-red-500 text-xs">{errors.laundryType.message}</p>
-          )}
-        </div>
-
         {/* Number of Bags */}
         <div>
           <label
@@ -231,161 +199,75 @@ const StepOneForm: React.FC<StepOneProps> = ({
           )}
         </div>
 
-        {/* ✅ Promo code (applies to both flows) */}
-        <div>
-          <label
-            htmlFor="promoCode"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Promo code
-          </label>
-          <div className="flex gap-2">
-            <input
-              id="promoCode"
-              type="text"
-              placeholder="Enter code"
-              {...register("promoCode")}
-              className="flex-1 border border-gray-300 rounded p-2"
-              autoComplete="off"
-            />
-            <button
-              type="button"
-              onClick={onVerifyPromo}
-              className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
-              aria-label="Verify promo code"
+        {/* Date & time-slot picker */}
+        <div className="text-gray-600 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label
+              htmlFor="dropOffDate"
+              className="block text-sm font-medium text-gray-800 mb-1"
             >
-              Verify
-            </button>
+              <span className="text-red-500">*</span> Select drop-off day
+            </label>
+            <DropOffDatePicker
+              date={date}
+              setDate={handleDateChange}
+              error={errors.dropOffDate?.message}
+              inputId="dropOffDate"
+            />
+            {isWeekend && (
+              <p className="mt-1 text-xs text-gray-500">
+                Orders dropped off on weekends begin processing Monday.
+              </p>
+            )}
           </div>
-          {/* Hidden field to carry result */}
-          <input type="hidden" {...register("promoValid")} />
-          {errors.promoCode && (
-            <p className="text-red-500 text-xs">{errors.promoCode.message}</p>
-          )}
-          {watch("promoValid") &&
-          !errors.promoCode &&
-          watch("promoCode")?.trim() ? (
-            <p className="text-green-600 text-xs mt-1">Promo applied.</p>
-          ) : null}
+
+          <div>
+            <label
+              htmlFor="timeSlot"
+              className="block text-sm font-medium text-gray-800 mb-1"
+            >
+              <span className="text-red-500">*</span> Select drop-off time
+            </label>
+
+            <select
+              id="timeSlot"
+              {...register("timeSlot", {
+                required: "Please pick a time slot.",
+              })}
+              className={`w-full border rounded p-2 transition ${
+                slot
+                  ? "bg-blue-50 border-blue-500 text-gray-900"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+              }`}
+              aria-placeholder="Select a drop off time"
+            >
+              <option value="">Select a time slot</option>
+              {availableSlots.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              Staff are only available during these windows to collect your
+              order — please arrive within your selected time.
+            </p>
+
+            {errors.timeSlot && (
+              <p className="text-red-500 text-sm">{errors.timeSlot.message}</p>
+            )}
+          </div>
         </div>
 
-        {/* ✅ Address (only when Pickup & Delivery) */}
-        {isPickupDelivery && (
-          <fieldset className="border border-gray-200 rounded p-3">
-            <legend className="text-sm font-medium text-gray-700 px-1">
-              Pickup Address
-            </legend>
+        {/* Hidden input keeps dropOffDate registered/validated */}
+        <input
+          type="hidden"
+          {...register("dropOffDate", {
+            required: "Please pick a date.",
+          })}
+          value={date?.toISOString() || ""}
+        />
 
-            <div className="mt-2">
-              <label
-                htmlFor="addressLine1"
-                className="block text-sm text-gray-700 mb-1"
-              >
-                <span className="text-red-500">*</span> Street address
-              </label>
-              <input
-                id="addressLine1"
-                type="text"
-                className="w-full border border-gray-300 rounded p-2"
-                {...register("addressLine1", {
-                  required: "Street address is required for pickup.",
-                })}
-                autoComplete="address-line1"
-              />
-              {errors.addressLine1 && (
-                <p className="text-red-500 text-xs">
-                  {errors.addressLine1.message}
-                </p>
-              )}
-            </div>
-
-            <div className="mt-2">
-              <label
-                htmlFor="addressLine2"
-                className="block text-sm text-gray-700 mb-1"
-              >
-                Apt / Unit (optional)
-              </label>
-              <input
-                id="addressLine2"
-                type="text"
-                className="w-full border border-gray-300 rounded p-2"
-                {...register("addressLine2")}
-                autoComplete="address-line2"
-              />
-            </div>
-
-            <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div>
-                <label
-                  htmlFor="city"
-                  className="block text-sm text-gray-700 mb-1"
-                >
-                  <span className="text-red-500">*</span> City
-                </label>
-                <input
-                  id="city"
-                  type="text"
-                  className="w-full border border-gray-300 rounded p-2"
-                  {...register("city", {
-                    required: "City is required for pickup.",
-                  })}
-                  autoComplete="address-level2"
-                />
-                {errors.city && (
-                  <p className="text-red-500 text-xs">{errors.city.message}</p>
-                )}
-              </div>
-              <div>
-                <label
-                  htmlFor="state"
-                  className="block text-sm text-gray-700 mb-1"
-                >
-                  <span className="text-red-500">*</span> State
-                </label>
-                <input
-                  id="state"
-                  type="text"
-                  defaultValue="CA"
-                  className="w-full border border-gray-300 rounded p-2"
-                  {...register("state", {
-                    required: "State is required for pickup.",
-                  })}
-                  autoComplete="address-level1"
-                />
-                {errors.state && (
-                  <p className="text-red-500 text-xs">{errors.state.message}</p>
-                )}
-              </div>
-              <div>
-                <label
-                  htmlFor="zip"
-                  className="block text-sm text-gray-700 mb-1"
-                >
-                  <span className="text-red-500">*</span> ZIP
-                </label>
-                <input
-                  id="zip"
-                  type="text"
-                  className="w-full border border-gray-300 rounded p-2"
-                  {...register("zip", {
-                    required: "ZIP is required for pickup.",
-                    pattern: {
-                      value: /^\d{5}(-\d{4})?$/,
-                      message: "Enter a valid ZIP",
-                    },
-                  })}
-                  autoComplete="postal-code"
-                />
-                {errors.zip && (
-                  <p className="text-red-500 text-xs">{errors.zip.message}</p>
-                )}
-              </div>
-            </div>
-          </fieldset>
-        )}
-
-        {/* Special Instructions */}
         <div>
           <label
             htmlFor="specialRequests"
@@ -397,7 +279,7 @@ const StepOneForm: React.FC<StepOneProps> = ({
             id="specialRequests"
             {...register("specialRequests")}
             className="w-full border border-gray-300 rounded p-2"
-            placeholder="e.g., gate code, pet note, fabric softener, bleach, heavy stains"
+            placeholder="e.g., hang dry clothes, pet note, fabric softener, bleach, heavy stains"
             rows={3}
           />
         </div>

@@ -8,29 +8,16 @@ type DropOffDatePickerProps = {
   setDate: (date: Date | null) => void;
   error?: string;
   inputId?: string;
-  // when true, only allow Mon/Wed/Fri (pickup & delivery flow)
-  pickupOnly?: boolean;
 };
-
-const ALLOWED_PICKUP_DAYS = [1, 3, 5]; // Mon=1, Wed=3, Fri=5
-
-function isAllowedPickupDay(d: Date) {
-  return ALLOWED_PICKUP_DAYS.includes(d.getDay());
-}
 
 export default function DropOffDatePicker({
   date,
   setDate,
   error,
   inputId,
-  pickupOnly,
 }: DropOffDatePickerProps) {
   const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-
-  // Fallback: weekdays for non-pickup flows
-  const isWeekday = (d: Date) => d.getDay() !== 0 && d.getDay() !== 6;
+  today.setHours(0, 0, 0, 0);
 
   return (
     <div className="relative">
@@ -39,8 +26,7 @@ export default function DropOffDatePicker({
         id={inputId}
         selected={date}
         onChange={setDate}
-        minDate={tomorrow} // never allow same-day; forces Tue→Wed, Wed→Fri, Fri→Mon, etc.
-        filterDate={pickupOnly ? isAllowedPickupDay : isWeekday}
+        minDate={today}
         dateFormat="MMMM d, yyyy"
         autoComplete="off"
         placeholderText="Choose date"

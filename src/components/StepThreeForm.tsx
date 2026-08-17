@@ -3,24 +3,16 @@ import { Helmet } from "react-helmet";
 
 type StepThreeFormProps = {
   orderId: string;
-  deliveryType: "Pickup & Delivery" | "Drop-off";
 };
 
-const StepThreeForm: React.FC<StepThreeFormProps> = ({
-  orderId,
-  deliveryType,
-}) => {
-  const isPickup = deliveryType === "Pickup & Delivery";
-
+const StepThreeForm: React.FC<StepThreeFormProps> = ({ orderId }) => {
   return (
     <div className="text-center">
       <Helmet>
         <title>Thank You | The Laundry Hub SF</title>
         <meta
           name="description"
-          content={`Thank you for your ${
-            isPickup ? "pickup & delivery" : "drop-off"
-          } order with The Laundry Hub SF.`}
+          content="Thank you for your drop-off order with The Laundry Hub SF."
         />
       </Helmet>
 
@@ -39,25 +31,10 @@ const StepThreeForm: React.FC<StepThreeFormProps> = ({
           🧺 Please place your laundry in a securely tied plastic bag.
         </p>
 
-        {isPickup ? (
-          <div className="my-2">
-            <p>🚚 Our driver will arrive during your selected time window.</p>
-            <p>📱 Keep your phone nearby for pickup updates.</p>
-            <p className="my-2">
-              📦 Leave your bagged laundry on the front porch, clearly visible
-              for the driver.
-            </p>
-            <p className="my-2">
-              🚫 Do not use baskets, hampers, or open containers this helps
-              prevent items from being lost in transit.
-            </p>
-          </div>
-        ) : (
-          <div className="my-2">
-            <p>👕 An attendant will be there to collect your laundry.</p>
-            <p>📱 Show your confirmation number at drop-off.</p>
-          </div>
-        )}
+        <div className="my-2">
+          <p>👕 An attendant will be there to collect your laundry.</p>
+          <p>📱 Show your confirmation number at drop-off.</p>
+        </div>
 
         <p>We appreciate your business!</p>
         <a

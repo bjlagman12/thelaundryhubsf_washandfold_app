@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import { startCase } from "lodash";
 import type { OrderForm } from "./CustomerForm";
 
 interface StepTwoFormProps {
@@ -12,6 +11,23 @@ interface StepTwoFormProps {
   onBack: () => void;
 }
 
+const TIER_LABELS: Record<string, string> = {
+  classic: "Classic Clean",
+  priority: "Priority Clean",
+  rush: "Rush Clean",
+};
+
+const formatDate = (value: string): string => {
+  if (!value) return "N/A";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "N/A";
+  return d.toLocaleDateString("en-US", {
+    month: "long",
+    day: "2-digit",
+    year: "numeric",
+  });
+};
+
 const StepTwoForm: React.FC<StepTwoFormProps> = ({
   getValues,
   handleSubmit,
@@ -20,23 +36,34 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
   setAgree,
   onBack,
 }) => {
-  const formatValue = (value: unknown): string => {
-    const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-    if (value === "" || value === null || value === undefined) {
-      return "N/A";
-    }
-    if (typeof value === "string" && isoRegex.test(value)) {
-      const d = new Date(value);
-      if (!isNaN(d.getTime())) {
-        return d.toLocaleDateString("en-US", {
-          month: "long",
-          day: "2-digit",
-          year: "numeric",
-        });
-      }
-    }
-    return value.toString();
-  };
+  const values = getValues();
+
+  const summaryItems: { label: string; value: string }[] = [
+    {
+      label: "Name",
+      value: `${values.firstName} ${values.lastName}`.trim() || "N/A",
+    },
+    { label: "Phone", value: values.phone || "N/A" },
+    ...(values.email ? [{ label: "Email", value: values.email }] : []),
+    {
+      label: "Customer Type",
+      value: values.newCustomer ? "New Customer" : "Existing Customer",
+    },
+    ...(values.serviceType
+      ? [
+          {
+            label: "Service Tier",
+            value: TIER_LABELS[values.serviceType] ?? values.serviceType,
+          },
+        ]
+      : []),
+    { label: "Number of Bags", value: values.numberOfBags || "N/A" },
+    { label: "Drop-off Date", value: formatDate(values.dropOffDate) },
+    { label: "Drop-off Time", value: values.timeSlot || "N/A" },
+    ...(values.specialRequests
+      ? [{ label: "Notes", value: values.specialRequests }]
+      : []),
+  ];
 
   const [showTermsError, setShowTermsError] = React.useState(false);
   const [showTerms, setShowTerms] = React.useState(false);
@@ -81,17 +108,11 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
           Review Your Order
         </h2>
         <ul className="text-md text-gray-700 space-y-1 mb-4">
-          {Object.entries(getValues())
-            .slice(0, -2)
-            .map(([key, value]) => {
-              if (key === "orderId" || key === "notes") return null;
-
-              return (
-                <li key={key}>
-                  <strong>{startCase(key)}:</strong> {formatValue(value)}
-                </li>
-              );
-            })}
+          {summaryItems.map((item) => (
+            <li key={item.label}>
+              <strong>{item.label}:</strong> {item.value}
+            </li>
+          ))}
         </ul>
 
         <div className="mb-4  text-sm">

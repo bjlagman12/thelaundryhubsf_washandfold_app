@@ -29,31 +29,25 @@ export const sendSmsOnOrder = onDocumentCreated(
 
     const client = twilio(TWILIO_SID.value(), TWILIO_TOKEN.value());
 
-    const customerMessage = `🌀 Hi ${order.firstName}, your order #${order.orderId} was received by The Laundry Hub SF! We’ll text you when it’s ready for pickup.`;
+    const dropOffDateFormatted = new Date(order.dropOffDate).toLocaleDateString(
+      "en-US",
+      { weekday: "long", month: "long", day: "2-digit" }
+    );
 
-    const ownerMessage = `📥 New Order Received:
+    const customerMessage = `🌀 Hi ${order.firstName}, your order was received by The Laundry Hub SF! Reminder: drop-off is ${dropOffDateFormatted}, ${order.timeSlot} — please be sure to drop off your laundry with an attendant. We’ll text you when it’s ready for pickup.`;
+
+    const ownerMessage = `📥 New drop-off order received
 - Name: ${order.firstName} ${order.lastName}
 - New Customer: ${order.newCustomer ? "Yes" : "No"}
 - Order ID: ${order.orderId}
 - Phone: ${order.phone}
-- Pickup/Drop-off: ${order.deliveryType}
 - Service Type: ${order.serviceType}
-- Drop-off/ Pick-up Date: ${new Date(order.dropOffDate).toLocaleDateString(
-      "en-US",
-      {
-        month: "long",
-        day: "2-digit",
-        year: "numeric",
-      }
-    )}
+- Drop-off Date: ${new Date(order.dropOffDate).toLocaleDateString("en-US", {
+      month: "long",
+      day: "2-digit",
+      year: "numeric",
+    })}
 - Time: ${order.timeSlot}
-- Address: ${
-      order.selectDelivery === "Pickup & Delivery"
-        ? `${order.addressLine1} ${order.addressLine2 || ""}, ${order.city}, ${
-            order.state
-          } ${order.zip}`
-        : "N/A"
-    }
 - specialRequests: ${order.specialRequests || "N/A"}`;
 
     const customerSend = client.messages.create({

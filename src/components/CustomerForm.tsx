@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { db } from "../firebase";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
-import { format, addDays, setHours, setMinutes } from "date-fns";
 import StepThreeForm from "./StepThreeForm";
 import StepTwoForm from "./StepTwoForm";
 import StepOneForm from "./StepOneForm";
 import StepZeroForm from "./StepZeroForm";
-import LH from "../../public/LH.svg";
+import LH from "../assets/Final - LH Icon.png";
 import { Helmet } from "react-helmet";
 
 export type OrderForm = {
@@ -16,34 +15,17 @@ export type OrderForm = {
   lastName: string;
   phone: string;
   email: string;
-  laundryType: "basic" | "premium" | "";
   numberOfBags: string;
   dropOffDate: string;
   timeSlot: string;
   specialRequests: string;
   orderId?: string;
   notes?: string;
-  serviceType: "" | "basic" | "premium";
-  selectDelivery: "" | "Pickup & Delivery" | "Drop-off";
-
-  // NEW (applies to both flows)
+  serviceType: "" | "classic" | "priority" | "rush";
   newCustomer?: boolean;
-  promoCode?: string;
-  promoValid?: boolean;
-
-  // NEW (pickup & delivery only)
-  addressLine1?: string;
-  addressLine2?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
 };
 
 const CustomerForm: React.FC = () => {
-  useEffect(() => {
-    window.location.replace("https://thelaundryhubsf.com/");
-  }, []);
-
   const [step, setStep] = useState(0);
   const [orderId, setOrderId] = useState("");
   const [agree, setAgree] = useState(false);
@@ -54,8 +36,6 @@ const CustomerForm: React.FC = () => {
     getValues,
     setValue,
     watch,
-    clearErrors,
-    setError,
     formState: { errors },
   } = useForm<OrderForm>({
     defaultValues: {
@@ -63,45 +43,15 @@ const CustomerForm: React.FC = () => {
       lastName: "",
       phone: "",
       email: "",
-      laundryType: "",
       numberOfBags: "",
-      dropOffDate: "",
+      dropOffDate: new Date().toISOString(),
       timeSlot: "",
       specialRequests: "",
       orderId: "",
       notes: "",
       serviceType: "",
-      selectDelivery: "",
-
-      newCustomer: false,
-      promoCode: "",
-      promoValid: false,
-      addressLine1: "",
-      addressLine2: "",
-      city: "",
-      state: "CA",
-      zip: "",
     },
   });
-
-  const deliveryType = watch("selectDelivery");
-
-  const isPickupDelivery = deliveryType === "Pickup & Delivery";
-
-  // Example: codes are case-insensitive
-  const promoCodes = ["SAVETIME2025", "RosePro2025", "DILIA2025"];
-
-  useEffect(() => {
-    // This effect is not used for SEO, but left for your time slot logic
-    const options: string[] = [];
-    for (let i = 1; i <= 2; i++) {
-      const date = addDays(new Date(), i);
-      const twelve = setMinutes(setHours(date, 12), 0);
-      const sevenThirty = setMinutes(setHours(date, 19), 30);
-      options.push(format(twelve, "EEEE, MMM d 'at' h:mmaaa"));
-      options.push(format(sevenThirty, "EEEE, MMM d 'at' h:mmaaa"));
-    }
-  }, []);
 
   const handleNext: SubmitHandler<OrderForm> = () => {
     setStep(2);
@@ -197,10 +147,6 @@ const CustomerForm: React.FC = () => {
                 onBack={() => setStep(0)}
                 setValue={setValue}
                 watch={watch}
-                clearErrors={clearErrors}
-                setError={setError}
-                isPickupDelivery={isPickupDelivery}
-                promoCodes={promoCodes}
               />
             </section>
           )}
@@ -226,10 +172,7 @@ const CustomerForm: React.FC = () => {
               <h2 id="step-3-heading" className="sr-only">
                 Thank You
               </h2>
-              <StepThreeForm
-                orderId={orderId}
-                deliveryType={deliveryType as "Pickup & Delivery" | "Drop-off"}
-              />
+              <StepThreeForm orderId={orderId} />
             </section>
           )}
         </section>
