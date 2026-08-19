@@ -15,6 +15,7 @@ import WinnerPage from "./components/WinnerPage";
 import MaterialHours from "./components/MaterialHours";
 import LeadsUpload from "./components/LeadsUpload";
 import LeadsSearch from "./components/LeadsSearch";
+import StaffHelp from "./components/staff/StaffHelp";
 
 const NotFound = () => (
   <>
@@ -46,6 +47,7 @@ const App = () => {
           <Route path="/winner" element={<WinnerPage />} />
           <Route path="/material-hours" element={<MaterialHours />} />
           <Route path="/leads-upload" element={<LeadsUpload />} />
+          <Route path="/staff" element={<StaffHelp />} />
           <Route
             path="/leads-search"
             element={
