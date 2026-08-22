@@ -86,10 +86,10 @@ export default function StaffHelp() {
           <ScheduleTab t={t} />
         </div>
         <div className={`${styles.view} ${activeTab === "help" ? styles.viewActive : ""}`}>
-          <HelpTab t={t} />
+          <HelpTab t={t} language={language} />
         </div>
         <div className={`${styles.view} ${activeTab === "emergency" ? styles.viewActive : ""}`}>
-          <EmergencyTab t={t} />
+          <EmergencyTab t={t} language={language} />
         </div>
 
         <footer className={styles.footer}>{t.footer}</footer>

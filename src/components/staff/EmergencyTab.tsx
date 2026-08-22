@@ -1,6 +1,6 @@
 import styles from "./StaffHelp.module.css";
-import { contacts } from "../../data/staffHelpStatic";
-import type { StaffHelpStrings } from "../../i18n/staffHelpStrings";
+import { getContacts } from "../../data/staffHelpStatic";
+import type { Language, StaffHelpStrings } from "../../i18n/staffHelpStrings";
 
 const initials = (name: string) =>
   name
@@ -16,7 +16,14 @@ const avatarClassFor = (cls: "" | "amber" | "red") => {
   return "";
 };
 
-export default function EmergencyTab({ t }: { t: StaffHelpStrings }) {
+export default function EmergencyTab({
+  t,
+  language,
+}: {
+  t: StaffHelpStrings;
+  language: Language;
+}) {
+  const contacts = getContacts(language);
   return (
     <div>
       <div className={styles.emergencyBanner}>{t.emergencyBanner}</div>

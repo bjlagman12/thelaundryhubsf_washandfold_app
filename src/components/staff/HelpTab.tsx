@@ -1,9 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import styles from "./StaffHelp.module.css";
 import { fetchFaqCsv, type FaqRow } from "../../lib/googleSheets";
-import type { StaffHelpStrings } from "../../i18n/staffHelpStrings";
+import type { Language, StaffHelpStrings } from "../../i18n/staffHelpStrings";
 
 const FAQ_CSV_URL = import.meta.env.VITE_STAFF_FAQ_CSV_URL as string | undefined;
+
+// The sheet's Category column is a small fixed set of English values —
+// translate those for display without needing a sheet change.
+const CATEGORY_ES: Record<string, string> = {
+  Schedule: "Horario",
+  Pay: "Pago",
+  Machines: "Máquinas",
+  Customers: "Clientes",
+  Closing: "Cierre",
+  Safety: "Seguridad",
+  General: "General",
+};
+
+function categoryLabel(category: string, language: Language): string {
+  if (language !== "es") return category;
+  return CATEGORY_ES[category] ?? category;
+}
 
 function highlight(text: string, query: string) {
   if (!query) return text;
@@ -53,7 +70,13 @@ function parseAnswer(answer: string): { text: string; images: string[] } {
   return { text: textLines.join("\n").trim(), images };
 }
 
-export default function HelpTab({ t }: { t: StaffHelpStrings }) {
+export default function HelpTab({
+  t,
+  language,
+}: {
+  t: StaffHelpStrings;
+  language: Language;
+}) {
   const [faqs, setFaqs] = useState<FaqRow[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error" | "unconfigured">(
     "loading"
@@ -94,11 +117,13 @@ export default function HelpTab({ t }: { t: StaffHelpStrings }) {
     return faqs.filter((f) => {
       const matchesCategory =
         activeCategory === t.categoryAll || f.category === activeCategory;
-      const haystack = `${f.question} ${f.answer} ${f.keywords} ${f.category}`.toLowerCase();
+      const question = language === "es" && f.questionEs ? f.questionEs : f.question;
+      const answer = language === "es" && f.answerEs ? f.answerEs : f.answer;
+      const haystack = `${question} ${answer} ${f.keywords} ${f.category}`.toLowerCase();
       const matchesQuery = !q || haystack.includes(q);
       return matchesCategory && matchesQuery;
     });
-  }, [faqs, query, activeCategory, t.categoryAll]);
+  }, [faqs, query, activeCategory, t.categoryAll, language]);
 
   return (
     <div>
@@ -138,7 +163,7 @@ export default function HelpTab({ t }: { t: StaffHelpStrings }) {
               setOpenIndex(null);
             }}
           >
-            {cat}
+            {cat === t.categoryAll ? cat : categoryLabel(cat, language)}
           </button>
         ))}
       </div>
@@ -176,7 +201,10 @@ export default function HelpTab({ t }: { t: StaffHelpStrings }) {
             {filtered.map((f) => {
               const realIndex = faqs.indexOf(f);
               const isOpen = openIndex === realIndex;
-              const { text: answerText, images: answerImages } = parseAnswer(f.answer);
+              const question =
+                language === "es" && f.questionEs ? f.questionEs : f.question;
+              const rawAnswer = language === "es" && f.answerEs ? f.answerEs : f.answer;
+              const { text: answerText, images: answerImages } = parseAnswer(rawAnswer);
               return (
                 <div
                   key={realIndex}
@@ -188,8 +216,8 @@ export default function HelpTab({ t }: { t: StaffHelpStrings }) {
                     onClick={() => setOpenIndex(isOpen ? null : realIndex)}
                   >
                     <span>
-                      <span className={styles.tag}>{f.category}</span>
-                      {highlight(f.question, query)}
+                      <span className={styles.tag}>{categoryLabel(f.category, language)}</span>
+                      {highlight(question, query)}
                     </span>
                     <svg
                       className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ""}`}

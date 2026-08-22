@@ -3,10 +3,15 @@ import Papa from "papaparse";
 export type FaqRow = {
   category: string;
   question: string;
+  questionEs: string;
   answer: string;
+  answerEs: string;
   keywords: string;
 };
 
+// The SOP sheet can optionally carry "Preguntas" / "Respuestas" columns
+// alongside "Questions" / "Answers" for a Spanish version of each row — the
+// app falls back to the English text when those are blank.
 export async function fetchFaqCsv(csvUrl: string): Promise<FaqRow[]> {
   const res = await fetch(csvUrl);
   if (!res.ok) throw new Error(`Failed to fetch FAQ sheet: ${res.status}`);
@@ -21,7 +26,9 @@ export async function fetchFaqCsv(csvUrl: string): Promise<FaqRow[]> {
     .map((row) => ({
       category: (row["Category"] ?? "").trim(),
       question: (row["Questions"] ?? "").trim(),
+      questionEs: (row["Preguntas"] ?? "").trim(),
       answer: (row["Answers"] ?? "").trim(),
+      answerEs: (row["Respuestas"] ?? "").trim(),
       keywords: (row["key terms"] ?? "").trim(),
     }))
     .filter((row) => row.question && row.answer);
