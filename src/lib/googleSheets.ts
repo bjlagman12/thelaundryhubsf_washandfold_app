@@ -33,10 +33,14 @@ export type ShiftRow = {
   shift: string;
 };
 
-const MONTH_ABBREVIATIONS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+const MONTH_NAMES_UPPER = [
+  "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+  "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER",
 ];
+
+// Matches a month-header row like "AUGUST 2026 / AGOSTO 2026" or
+// "NOVEMBER 2026 / NOVIEMBRE 2026 (projected — repeats current rotation)".
+const MONTH_HEADER_RE = /^([A-Z]+)\s+(\d{4})/;
 
 async function fetchSheetsJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -46,98 +50,78 @@ async function fetchSheetsJson<T>(url: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-// Any "<Mon> <Year> List" tab for the current month or later — so once the
-// owner creates next month's tab (e.g. "Oct 2026 List"), employees can see
-// it immediately without waiting for the calendar to roll over.
-async function findUpcomingTabTitles(
-  spreadsheetId: string,
-  apiKey: string
-): Promise<string[]> {
-  const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?key=${apiKey}&fields=sheets.properties.title`;
-  const meta = await fetchSheetsJson<{
-    sheets?: { properties?: { title?: string } }[];
-  }>(metaUrl);
-
-  const titles = (meta.sheets ?? [])
-    .map((s) => s.properties?.title)
-    .filter((t): t is string => Boolean(t));
-
-  const now = new Date();
-  const currentSortKey = now.getFullYear() * 12 + now.getMonth();
-
-  const monthTabs = titles
-    .map((title) => {
-      const match = title.match(/^([A-Za-z]{3}) (\d{4}) List$/);
-      if (!match) return null;
-      const monthIndex = MONTH_ABBREVIATIONS.indexOf(match[1]);
-      if (monthIndex === -1) return null;
-      return { title, sortKey: Number(match[2]) * 12 + monthIndex };
-    })
-    .filter((t): t is { title: string; sortKey: number } => t !== null)
-    .sort((a, b) => a.sortKey - b.sortKey);
-
-  const upcoming = monthTabs.filter((t) => t.sortKey >= currentSortKey);
-
-  // Fall back to the most recent past tab if nothing current/future exists
-  // yet (e.g. this month's tab hasn't been created).
-  if (upcoming.length === 0 && monthTabs.length > 0) {
-    return [monthTabs[monthTabs.length - 1].title];
+// Each in-month cell of the shift row looks like "Eva: 10:00 AM–11:00 AM"
+// (multiple entries separated by blank lines, purely for visual grouping in
+// the sheet) — split on the first colon to pull out employee + shift text.
+function parseCellShifts(cellText: string, date: Date): ShiftRow[] {
+  const shifts: ShiftRow[] = [];
+  for (const line of cellText.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const sep = trimmed.indexOf(":");
+    if (sep === -1) continue;
+    shifts.push({
+      date,
+      employee: trimmed.slice(0, sep).trim(),
+      shift: trimmed.slice(sep + 1).trim(),
+    });
   }
-
-  return upcoming.map((t) => t.title);
+  return shifts;
 }
 
-async function fetchTabShifts(
+// Parses the "Master Calendar" sheet — a real visual month-by-month grid
+// (month header row, weekday header row, then repeating date-number-row /
+// shift-text-row pairs per week, blank row between months) — the same
+// layout the owner edits directly, so the app mirrors it exactly.
+export async function fetchMasterCalendar(
   spreadsheetId: string,
-  apiKey: string,
-  tabTitle: string
+  sheetTitle: string,
+  apiKey: string
 ): Promise<ShiftRow[]> {
   const valuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
-    tabTitle
+    sheetTitle
   )}?key=${apiKey}`;
   const values = await fetchSheetsJson<{ values?: string[][] }>(valuesUrl);
   const rows = values.values ?? [];
 
-  // The sheet has a few title/notes rows before the real column header
-  // ("Date / Fecha", "Day / Día", "Employee / Empleado", "Shift / Turno"),
-  // and that count can change if the owner edits the sheet — so find the
-  // header row by content instead of assuming a fixed position.
-  const headerIndex = rows.findIndex(
-    (row) => /date/i.test(row[0] ?? "") && /employee/i.test(row[2] ?? "")
-  );
-  const dataRows = headerIndex === -1 ? [] : rows.slice(headerIndex + 1);
-
-  // Columns are Date, Day, Employee, Shift (bilingual headers) — forward-fill
-  // blank dates, since multiple shifts on the same date only carry the date
-  // on the first row.
   const shifts: ShiftRow[] = [];
-  let lastDate: Date | null = null;
+  let year: number | null = null;
+  let monthIndex: number | null = null;
+  let pendingDateRow: string[] | null = null;
 
-  for (const row of dataRows) {
-    const [dateCell, , employeeCell, shiftCell] = row;
-    if (dateCell && dateCell.trim()) {
-      const parsed = new Date(dateCell.trim());
-      if (!Number.isNaN(parsed.getTime())) lastDate = parsed;
+  for (const row of rows) {
+    const first = (row[0] ?? "").trim();
+    const monthMatch = !pendingDateRow && first.match(MONTH_HEADER_RE);
+    const matchedMonthIndex = monthMatch
+      ? MONTH_NAMES_UPPER.indexOf(monthMatch[1])
+      : -1;
+
+    if (monthMatch && matchedMonthIndex !== -1) {
+      monthIndex = matchedMonthIndex;
+      year = Number(monthMatch[2]);
+      continue;
     }
-    if (!lastDate || !employeeCell) continue;
 
-    shifts.push({
-      date: lastDate,
-      employee: employeeCell.trim(),
-      shift: (shiftCell ?? "").trim(),
-    });
+    if (year === null || monthIndex === null) continue; // still before the first month header
+    if (!pendingDateRow) {
+      // The weekday header row ("Sunday / Domingo", ...) and blank rows
+      // between months have no numeric day cells, so they're safely
+      // skipped here without needing an explicit row-position counter.
+      if (row.some((cell) => /^\d+$/.test((cell ?? "").trim()))) {
+        pendingDateRow = row;
+      }
+      continue;
+    }
+
+    // `row` is the shift-text row for `pendingDateRow`.
+    for (let col = 0; col < 7; col++) {
+      const dayStr = (pendingDateRow[col] ?? "").trim();
+      if (!/^\d+$/.test(dayStr)) continue;
+      const date = new Date(year, monthIndex, Number(dayStr));
+      shifts.push(...parseCellShifts(row[col] ?? "", date));
+    }
+    pendingDateRow = null;
   }
 
-  return shifts;
-}
-
-export async function fetchUpcomingSchedule(
-  spreadsheetId: string,
-  apiKey: string
-): Promise<ShiftRow[]> {
-  const tabTitles = await findUpcomingTabTitles(spreadsheetId, apiKey);
-  const perTab = await Promise.all(
-    tabTitles.map((title) => fetchTabShifts(spreadsheetId, apiKey, title))
-  );
-  return perTab.flat().sort((a, b) => a.date.getTime() - b.date.getTime());
+  return shifts.sort((a, b) => a.date.getTime() - b.date.getTime());
 }

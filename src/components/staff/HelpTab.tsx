@@ -18,6 +18,41 @@ function highlight(text: string, query: string) {
   );
 }
 
+// An answer cell can include image links on their own line (e.g. pasted
+// Firebase Storage download URLs, or Google Drive share links) alongside
+// the explanation text — pull those out so they render as an image
+// gallery instead of a raw URL.
+const IMAGE_URL_RE = /^https?:\/\/\S+\.(jpe?g|png|gif|webp)(\?\S*)?$/i;
+
+// Matches a Drive file id out of any of Drive's share-link shapes:
+// /file/d/<id>/view, ?id=<id>, open?id=<id>, uc?id=<id>, thumbnail?id=<id>
+const DRIVE_ID_RE = /drive\.google\.com\/(?:file\/d\/([\w-]{10,})|\S*[?&]id=([\w-]{10,}))/i;
+
+function driveImageUrl(line: string): string | null {
+  const match = line.match(DRIVE_ID_RE);
+  const id = match?.[1] ?? match?.[2];
+  // "thumbnail" is Drive's embeddable-image endpoint — unlike "uc?export=view",
+  // it doesn't hit the "can't scan this file for viruses" interstitial.
+  return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1000` : null;
+}
+
+function parseAnswer(answer: string): { text: string; images: string[] } {
+  const images: string[] = [];
+  const textLines: string[] = [];
+  for (const line of answer.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    const driveUrl = driveImageUrl(trimmed);
+    if (driveUrl) {
+      images.push(driveUrl);
+    } else if (IMAGE_URL_RE.test(trimmed)) {
+      images.push(trimmed);
+    } else {
+      textLines.push(line);
+    }
+  }
+  return { text: textLines.join("\n").trim(), images };
+}
+
 export default function HelpTab({ t }: { t: StaffHelpStrings }) {
   const [faqs, setFaqs] = useState<FaqRow[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error" | "unconfigured">(
@@ -141,6 +176,7 @@ export default function HelpTab({ t }: { t: StaffHelpStrings }) {
             {filtered.map((f) => {
               const realIndex = faqs.indexOf(f);
               const isOpen = openIndex === realIndex;
+              const { text: answerText, images: answerImages } = parseAnswer(f.answer);
               return (
                 <div
                   key={realIndex}
@@ -168,7 +204,18 @@ export default function HelpTab({ t }: { t: StaffHelpStrings }) {
                     </svg>
                   </button>
                   <div className={`${styles.cardA} ${isOpen ? styles.cardAOpen : ""}`}>
-                    <div className={styles.cardAInner}>{highlight(f.answer, query)}</div>
+                    <div className={styles.cardAInner}>
+                      <div className={styles.answerText}>{highlight(answerText, query)}</div>
+                      {answerImages.length > 0 && (
+                        <div className={styles.answerImages}>
+                          {answerImages.map((src) => (
+                            <a key={src} href={src} target="_blank" rel="noopener noreferrer">
+                              <img src={src} alt="" className={styles.answerImage} />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

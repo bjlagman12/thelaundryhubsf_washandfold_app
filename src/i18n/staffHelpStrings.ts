@@ -7,16 +7,11 @@ export type StaffHelpStrings = {
   tabSchedule: string;
   tabHelp: string;
   tabEmergency: string;
-  scheduleViewCalendar: string;
-  scheduleViewFull: string;
-  scheduleFullThrough: (label: string) => string;
   scheduleGuidelinesTitle: string;
   scheduleGuidelines: string[];
-  today: string;
   scheduleLoading: string;
   scheduleError: string;
   scheduleNotConfigured: string;
-  scheduleEmptyForDay: string;
   scheduleUnavailable: string;
   myScheduleAll: string;
   myScheduleEmpty: string;
@@ -41,9 +36,6 @@ export const staffHelpStrings: Record<Language, StaffHelpStrings> = {
     tabSchedule: "Schedule",
     tabHelp: "Ask",
     tabEmergency: "Contacts",
-    scheduleViewCalendar: "Next 3 Weeks",
-    scheduleViewFull: "Full Schedule",
-    scheduleFullThrough: (label: string) => `Showing every upcoming shift through ${label}.`,
     scheduleGuidelinesTitle: "Important",
     scheduleGuidelines: [
       "These are set drop-off/pickup windows for wash & fold orders. Be on time and available.",
@@ -51,11 +43,9 @@ export const staffHelpStrings: Record<Language, StaffHelpStrings> = {
       "Busy with orders? You're welcome to come in 1–2 hrs early, just ask Brian first.",
       "Need a day off? Swap shifts with a coworker and give Brian at least 2 weeks' notice.",
     ],
-    today: "TODAY",
     scheduleLoading: "Loading schedule…",
     scheduleError: "Couldn't load the schedule right now. Try again later.",
     scheduleNotConfigured: "Schedule isn't connected yet.",
-    scheduleEmptyForDay: "No one scheduled",
     scheduleUnavailable: "Not available",
     myScheduleAll: "All",
     myScheduleEmpty: "No upcoming shifts found.",
@@ -78,9 +68,6 @@ export const staffHelpStrings: Record<Language, StaffHelpStrings> = {
     tabSchedule: "Horario",
     tabHelp: "Preguntar",
     tabEmergency: "Contactos",
-    scheduleViewCalendar: "Próximas 3 Semanas",
-    scheduleViewFull: "Horario Completo",
-    scheduleFullThrough: (label: string) => `Mostrando todos los turnos próximos hasta ${label}.`,
     scheduleGuidelinesTitle: "Importante",
     scheduleGuidelines: [
       "Estos horarios son fijos para pedidos de lavado y doblado. Llegue a tiempo y esté disponible.",
@@ -88,11 +75,9 @@ export const staffHelpStrings: Record<Language, StaffHelpStrings> = {
       "¿Mucho trabajo? Puede llegar 1–2 horas antes, solo pregúntele a Brian primero.",
       "¿Necesita un día libre? Cambie su turno con un compañero y avísele a Brian con al menos 2 semanas de anticipación.",
     ],
-    today: "HOY",
     scheduleLoading: "Cargando horario…",
     scheduleError: "No se pudo cargar el horario. Intenta de nuevo más tarde.",
     scheduleNotConfigured: "El horario aún no está conectado.",
-    scheduleEmptyForDay: "Nadie programado",
     scheduleUnavailable: "No disponible",
     myScheduleAll: "Todos",
     myScheduleEmpty: "No hay turnos próximos.",

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "./StaffHelp.module.css";
-import { fetchUpcomingSchedule, type ShiftRow } from "../../lib/googleSheets";
+import { fetchMasterCalendar, type ShiftRow } from "../../lib/googleSheets";
 import type { StaffHelpStrings } from "../../i18n/staffHelpStrings";
 
 const SPREADSHEET_ID = import.meta.env.VITE_STAFF_SCHEDULE_SHEET_ID as
@@ -9,6 +9,7 @@ const SPREADSHEET_ID = import.meta.env.VITE_STAFF_SCHEDULE_SHEET_ID as
 const API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY as
   | string
   | undefined;
+const SHEET_TITLE = "Master Calendar";
 
 // Per the schedule sheet's own color key note ("Eva = blue, Flori = pink").
 // Any employee not listed here falls back to teal so new hires don't break.
@@ -37,20 +38,23 @@ const startOfDay = (d: Date) => {
   return copy;
 };
 
-const startOfWeek = (d: Date) => {
-  const copy = startOfDay(d);
-  copy.setDate(copy.getDate() - copy.getDay());
-  return copy;
-};
+// Builds a 7-wide grid of week rows for a given month, using `null` for
+// cells outside the month — matches the source spreadsheet's own blank
+// leading/trailing cells exactly.
+function monthGridWeeks(year: number, month: number): (number | null)[][] {
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const leadingBlanks = new Date(year, month, 1).getDay();
+  const cells: (number | null)[] = [
+    ...Array<null>(leadingBlanks).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+  const trailingBlanks = (7 - (cells.length % 7)) % 7;
+  cells.push(...Array<null>(trailingBlanks).fill(null));
 
-const CALENDAR_WEEKS = 3;
-
-const calendarDates = (from: Date) =>
-  Array.from({ length: CALENDAR_WEEKS * 7 }, (_, i) => {
-    const d = new Date(from);
-    d.setDate(d.getDate() + i);
-    return d;
-  });
+  const weeks: (number | null)[][] = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+  return weeks;
+}
 
 const SHORT_WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const FULL_WEEKDAY = [
@@ -65,22 +69,23 @@ const pad2 = (n: number) => String(n).padStart(2, "0");
 
 export default function ScheduleTab({ t }: { t: StaffHelpStrings }) {
   const today = startOfDay(new Date());
-  const days = calendarDates(startOfWeek(today));
 
-  const [activeDate, setActiveDate] = useState<Date>(today);
   const [shifts, setShifts] = useState<ShiftRow[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error" | "unconfigured">(
     "loading"
   );
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
-  const [showFullSchedule, setShowFullSchedule] = useState(false);
+  const [viewMonth, setViewMonth] = useState({
+    year: today.getFullYear(),
+    month: today.getMonth(),
+  });
 
   useEffect(() => {
     if (!SPREADSHEET_ID || !API_KEY) {
       setStatus("unconfigured");
       return;
     }
-    fetchUpcomingSchedule(SPREADSHEET_ID, API_KEY)
+    fetchMasterCalendar(SPREADSHEET_ID, SHEET_TITLE, API_KEY)
       .then((rows) => {
         setShifts(rows);
         setStatus("ready");
@@ -91,9 +96,34 @@ export default function ScheduleTab({ t }: { t: StaffHelpStrings }) {
       });
   }, []);
 
-  const shiftsForActiveDay = shifts.filter((s) => isSameDay(s.date, activeDate));
-
   const employeeNames = [...new Set(shifts.map((s) => s.employee))].sort();
+
+  const monthWeeks = monthGridWeeks(viewMonth.year, viewMonth.month);
+  const shiftsByDay = new Map<number, ShiftRow[]>();
+  for (const s of shifts) {
+    if (s.date.getFullYear() !== viewMonth.year || s.date.getMonth() !== viewMonth.month) {
+      continue;
+    }
+    const list = shiftsByDay.get(s.date.getDate()) ?? [];
+    list.push(s);
+    shiftsByDay.set(s.date.getDate(), list);
+  }
+
+  const monthKeys = shifts.map((s) => s.date.getFullYear() * 12 + s.date.getMonth());
+  const minMonthKey = monthKeys.length > 0 ? Math.min(...monthKeys) : null;
+  const maxMonthKey = monthKeys.length > 0 ? Math.max(...monthKeys) : null;
+  const viewMonthKey = viewMonth.year * 12 + viewMonth.month;
+  const canGoPrev = minMonthKey === null || viewMonthKey > minMonthKey;
+  const canGoNext = maxMonthKey === null || viewMonthKey < maxMonthKey;
+
+  const goToMonth = (delta: number) => {
+    setViewMonth((prev) => {
+      const total = prev.year * 12 + prev.month + delta;
+      return { year: Math.floor(total / 12), month: ((total % 12) + 12) % 12 };
+    });
+  };
+
+  const viewMonthLabel = `${MONTH_NAME[viewMonth.month]} ${viewMonth.year}`;
 
   const myUpcomingShifts = shifts
     .filter((s) => s.employee === selectedEmployee && s.date >= today)
@@ -110,41 +140,6 @@ export default function ScheduleTab({ t }: { t: StaffHelpStrings }) {
       myScheduleByDay.push({ date: s.date, shifts: [s] });
     }
   }
-
-  // Full schedule (all employees), grouped by day, spanning every fetched
-  // month, not just the 2-week window — for staff who want to look ahead.
-  const upcomingShifts = shifts
-    .filter((s) => s.date >= today)
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
-  const fullScheduleByDay: { date: Date; shifts: ShiftRow[] }[] = [];
-  for (const s of upcomingShifts) {
-    const last = fullScheduleByDay[fullScheduleByDay.length - 1];
-    if (last && isSameDay(last.date, s.date)) {
-      last.shifts.push(s);
-    } else {
-      fullScheduleByDay.push({ date: s.date, shifts: [s] });
-    }
-  }
-  const lastScheduledDate =
-    fullScheduleByDay.length > 0
-      ? fullScheduleByDay[fullScheduleByDay.length - 1].date
-      : null;
-  const lastScheduledLabel = lastScheduledDate
-    ? `${MONTH_NAME[lastScheduledDate.getMonth()].slice(0, 3)} ${lastScheduledDate.getDate()}`
-    : "";
-
-  const monthLabel = (() => {
-    const first = days[0];
-    const last = days[days.length - 1];
-    if (first.getMonth() === last.getMonth()) {
-      return `${MONTH_NAME[first.getMonth()]} ${first.getFullYear()}`;
-    }
-    return `${MONTH_NAME[first.getMonth()]} – ${MONTH_NAME[last.getMonth()]} ${last.getFullYear()}`;
-  })();
-
-  const selectedDayLabel = `${FULL_WEEKDAY[activeDate.getDay()]} ${pad2(
-    activeDate.getMonth() + 1
-  )}/${pad2(activeDate.getDate())}`;
 
   return (
     <div>
@@ -188,72 +183,47 @@ export default function ScheduleTab({ t }: { t: StaffHelpStrings }) {
 
       {selectedEmployee === null ? (
         <>
-          {status === "ready" && (
-            <div className={styles.employeeChips}>
-              <button
-                type="button"
-                className={`${styles.chip} ${!showFullSchedule ? styles.chipActive : ""}`}
-                onClick={() => setShowFullSchedule(false)}
-              >
-                {t.scheduleViewCalendar}
-              </button>
-              <button
-                type="button"
-                className={`${styles.chip} ${showFullSchedule ? styles.chipActive : ""}`}
-                onClick={() => setShowFullSchedule(true)}
-              >
-                {t.scheduleViewFull}
-              </button>
+          {status === "unconfigured" && (
+            <div className={styles.empty}>
+              <div className={styles.emptyBig}>🗓️</div>
+              <div>{t.scheduleNotConfigured}</div>
             </div>
           )}
-
-          {showFullSchedule ? (
+          {status === "loading" && (
+            <div className={styles.empty}>
+              <div className={styles.emptyBig}>🗓️</div>
+              <div>{t.scheduleLoading}</div>
+            </div>
+          )}
+          {status === "error" && (
+            <div className={styles.empty}>
+              <div className={styles.emptyBig}>⚠️</div>
+              <div>{t.scheduleError}</div>
+            </div>
+          )}
+          {status === "ready" && (
             <>
-              {lastScheduledLabel && (
-                <div className={styles.scheduleNote}>
-                  {t.scheduleFullThrough(lastScheduledLabel)}
-                </div>
-              )}
-              <div className={styles.shiftList}>
-                {fullScheduleByDay.length === 0 && (
-                  <div className={styles.empty}>
-                    <div className={styles.emptyBig}>🗓️</div>
-                    <div>{t.myScheduleEmpty}</div>
-                  </div>
-                )}
-                {fullScheduleByDay.map(({ date, shifts: dayShifts }) => {
-                  const dateLabel = `${FULL_WEEKDAY[date.getDay()]} ${pad2(
-                    date.getMonth() + 1
-                  )}/${pad2(date.getDate())}`;
-                  return (
-                    <div key={date.toISOString()}>
-                      <div className={styles.selectedDayHeading}>{dateLabel}</div>
-                      {dayShifts.map((s, i) => {
-                        const unavailable = /no disponible/i.test(s.shift);
-                        const avatarClass =
-                          EMPLOYEE_AVATAR_CLASS[s.employee] ?? FALLBACK_AVATAR_CLASS;
-                        return (
-                          <div key={`${s.employee}-${i}`} className={styles.shiftCard}>
-                            <div className={`${styles.avatar} ${avatarClass}`}>
-                              {initials(s.employee)}
-                            </div>
-                            <div className={styles.shiftInfo}>
-                              <div className={styles.shiftName}>{s.employee}</div>
-                              <div className={styles.shiftTime}>
-                                {unavailable ? t.scheduleUnavailable : s.shift}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
+              <div className={styles.monthNavRow}>
+                <button
+                  type="button"
+                  className={styles.monthNavBtn}
+                  onClick={() => goToMonth(-1)}
+                  disabled={!canGoPrev}
+                  aria-label="Previous month"
+                >
+                  ‹
+                </button>
+                <div className={styles.monthHeading}>{viewMonthLabel}</div>
+                <button
+                  type="button"
+                  className={styles.monthNavBtn}
+                  onClick={() => goToMonth(1)}
+                  disabled={!canGoNext}
+                  aria-label="Next month"
+                >
+                  ›
+                </button>
               </div>
-            </>
-          ) : (
-            <>
-              <div className={styles.monthHeading}>{monthLabel}</div>
               <div className={styles.calendarWeekdayRow}>
                 {SHORT_WEEKDAY.map((label) => (
                   <div key={label} className={styles.calendarWeekdayLabel}>
@@ -261,71 +231,53 @@ export default function ScheduleTab({ t }: { t: StaffHelpStrings }) {
                   </div>
                 ))}
               </div>
-              <div className={styles.calendarGrid}>
-                {days.map((day) => {
-                  const isToday = isSameDay(day, today);
-                  const isActive = isSameDay(day, activeDate);
-                  const isPast = day < today && !isToday;
-                  return (
-                    <button
-                      key={day.toISOString()}
-                      type="button"
-                      onClick={() => setActiveDate(day)}
-                      className={`${styles.dateCell} ${isPast ? styles.dateCellPast : ""} ${
-                        isToday ? styles.dateCellToday : ""
-                      } ${isActive ? styles.dateCellActive : ""}`}
-                    >
-                      {day.getDate()}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className={styles.selectedDayHeading}>{selectedDayLabel}</div>
-              <div className={styles.shiftList}>
-                {status === "unconfigured" && (
-                  <div className={styles.empty}>
-                    <div className={styles.emptyBig}>🗓️</div>
-                    <div>{t.scheduleNotConfigured}</div>
-                  </div>
-                )}
-                {status === "loading" && (
-                  <div className={styles.empty}>
-                    <div className={styles.emptyBig}>🗓️</div>
-                    <div>{t.scheduleLoading}</div>
-                  </div>
-                )}
-                {status === "error" && (
-                  <div className={styles.empty}>
-                    <div className={styles.emptyBig}>⚠️</div>
-                    <div>{t.scheduleError}</div>
-                  </div>
-                )}
-                {status === "ready" && shiftsForActiveDay.length === 0 && (
-                  <div className={styles.empty}>
-                    <div className={styles.emptyBig}>🗓️</div>
-                    <div>{t.scheduleEmptyForDay}</div>
-                  </div>
-                )}
-                {status === "ready" &&
-                  shiftsForActiveDay.map((s, i) => {
-                    const unavailable = /no disponible/i.test(s.shift);
-                    const avatarClass =
-                      EMPLOYEE_AVATAR_CLASS[s.employee] ?? FALLBACK_AVATAR_CLASS;
+              <div className={styles.monthGrid}>
+                {monthWeeks.map((week, wi) =>
+                  week.map((day, di) => {
+                    if (day === null) {
+                      return (
+                        <div
+                          key={`${wi}-${di}`}
+                          className={`${styles.dayCell} ${styles.dayCellBlank}`}
+                        />
+                      );
+                    }
+                    const cellDate = new Date(viewMonth.year, viewMonth.month, day);
+                    const isToday = isSameDay(cellDate, today);
+                    const isPast = cellDate < today && !isToday;
+                    const dayShiftsList = shiftsByDay.get(day) ?? [];
                     return (
-                      <div key={`${s.employee}-${i}`} className={styles.shiftCard}>
-                        <div className={`${styles.avatar} ${avatarClass}`}>
-                          {initials(s.employee)}
+                      <div
+                        key={`${wi}-${di}`}
+                        className={`${styles.dayCell} ${isToday ? styles.dayCellToday : ""} ${
+                          isPast ? styles.dayCellPast : ""
+                        }`}
+                      >
+                        <div className={`${styles.dayNumber} ${isPast ? styles.dayNumberPast : ""}`}>
+                          {day}
                         </div>
-                        <div className={styles.shiftInfo}>
-                          <div className={styles.shiftName}>{s.employee}</div>
-                          <div className={styles.shiftTime}>
-                            {unavailable ? t.scheduleUnavailable : s.shift}
-                          </div>
-                        </div>
+                        {dayShiftsList.map((s, i) => {
+                          const unavailable = /no disponible/i.test(s.shift);
+                          const avatarClass =
+                            EMPLOYEE_AVATAR_CLASS[s.employee] ?? FALLBACK_AVATAR_CLASS;
+                          return (
+                            <div
+                              key={i}
+                              className={`${styles.dayShiftLine} ${
+                                unavailable ? styles.dayShiftUnavailable : ""
+                              }`}
+                            >
+                              <span className={`${styles.dayShiftDot} ${avatarClass}`} />
+                              <span>
+                                {s.employee} {unavailable ? t.scheduleUnavailable : s.shift}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     );
-                  })}
+                  })
+                )}
               </div>
             </>
           )}

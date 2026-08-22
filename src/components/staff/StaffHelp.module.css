@@ -257,7 +257,7 @@
 }
 
 .cardAOpen {
-  max-height: 400px;
+  max-height: 3000px;
 }
 
 .cardAInner {
@@ -267,6 +267,26 @@
   color: #3a4250;
   border-top: 1px solid var(--gray-line);
   padding-top: 14px;
+}
+
+.answerText {
+  white-space: pre-line;
+}
+
+.answerImages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.answerImage {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--gray-line);
+  display: block;
 }
 
 .empty {
@@ -389,25 +409,52 @@
   background: #2f9e6e;
 }
 
-/* --- Calendar (2-week schedule view) --- */
+/* --- Calendar (month-grid schedule view) --- */
 
-.monthHeading {
+.monthNavRow {
   max-width: 720px;
   margin: 20px auto 0;
   padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.monthNavBtn {
+  border: 1.5px solid var(--gray-line);
+  background: var(--white);
+  color: var(--navy);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  flex: none;
+}
+
+.monthNavBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.monthHeading {
   font-size: 17px;
   font-weight: 700;
   color: var(--ink);
   text-align: center;
+  min-width: 160px;
 }
 
 .calendarWeekdayRow {
   max-width: 720px;
-  margin: 10px auto 0;
+  margin: 14px auto 0;
   padding: 0 20px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 
 .calendarWeekdayLabel {
@@ -419,41 +466,71 @@
   color: var(--gray-text);
 }
 
-.calendarGrid {
+.monthGrid {
   max-width: 720px;
-  margin: 4px auto 0;
+  margin: 4px auto 40px;
   padding: 0 20px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 
-.dateCell {
-  border: 1.5px solid var(--gray-line);
+.dayCell {
+  border: 1px solid var(--gray-line);
   background: var(--white);
-  color: var(--ink);
-  border-radius: 10px;
-  padding: 10px 4px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: center;
+  border-radius: 8px;
+  padding: 5px 4px 6px;
+  min-height: 64px;
 }
 
-.dateCellPast {
+.dayCellBlank {
+  border-color: transparent;
+  background: transparent;
+}
+
+.dayCellPast {
   background: var(--gray-bg);
+}
+
+.dayCellToday {
+  border: 2px solid var(--amber);
+  padding: 4px 3px 5px;
+}
+
+.dayNumber {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.dayNumberPast {
   color: #9aa3b0;
-  border-color: var(--gray-bg);
 }
 
-.dateCellToday {
-  border-color: var(--amber);
+.dayShiftLine {
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  font-size: 9.5px;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: 2px;
+  word-break: break-word;
 }
 
-.dateCellActive {
-  background: var(--navy);
-  border-color: var(--navy);
-  color: var(--white);
+.dayShiftDot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 3px;
+}
+
+.dayShiftUnavailable {
+  color: var(--gray-text);
+  text-decoration: line-through;
+  opacity: 0.7;
 }
 
 .employeeChips {
@@ -471,7 +548,6 @@
   height: 9px;
   border-radius: 50%;
   margin-right: 6px;
-  background: var(--gray-text);
 }
 
 .myScheduleDate {
@@ -481,15 +557,6 @@
   letter-spacing: 0.4px;
   color: var(--navy);
   margin-bottom: 2px;
-}
-
-.selectedDayHeading {
-  max-width: 720px;
-  margin: 18px auto 0;
-  padding: 0 20px;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--ink);
 }
 
 .importantCallout {
@@ -564,75 +631,6 @@
   padding: 3px 8px;
   border-radius: 6px;
   flex: none;
-}
-
-.scheduleNote {
-  padding: 0 20px 8px;
-  font-size: 13px;
-  color: var(--gray-text);
-  text-align: center;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* --- Announcements view --- */
-
-.announceList {
-  padding: 22px 20px 60px;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.announceCard {
-  background: var(--white);
-  border: 1px solid var(--gray-line);
-  border-left: 4px solid var(--gray-line);
-  border-radius: 10px;
-  padding: 16px 18px;
-  margin-bottom: 12px;
-}
-
-.announceCardPinned {
-  border-left-color: var(--amber);
-  background: #fffbf2;
-}
-
-.announceTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.announcePin {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: var(--amber);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.announceDate {
-  font-size: 12.5px;
-  color: var(--gray-text);
-  font-weight: 600;
-}
-
-.announceTitle {
-  font-size: 16.5px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.announceBody {
-  font-size: 15px;
-  line-height: 1.5;
-  color: #3a4250;
 }
 
 /* --- Emergency Contacts view --- */
