@@ -412,8 +412,7 @@
 /* --- Calendar (month-grid schedule view) --- */
 
 .monthNavRow {
-  max-width: 720px;
-  margin: 20px auto 0;
+  margin: 20px 0 0;
   padding: 0 20px;
   display: flex;
   align-items: center;
@@ -449,8 +448,7 @@
 }
 
 .calendarWeekdayRow {
-  max-width: 720px;
-  margin: 14px auto 0;
+  margin: 14px 0 0;
   padding: 0 20px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -467,8 +465,7 @@
 }
 
 .monthGrid {
-  max-width: 720px;
-  margin: 4px auto 40px;
+  margin: 4px 0 40px;
   padding: 0 20px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -534,7 +531,7 @@
 }
 
 .employeeChips {
-  max-width: 720px;
+  max-width: 960px;
   margin: 18px auto 0;
   padding: 0 20px;
   display: flex;
@@ -560,7 +557,7 @@
 }
 
 .importantCallout {
-  max-width: 720px;
+  max-width: 960px;
   margin: 20px auto 0;
   padding: 16px 18px;
   background: #fbeae8;
