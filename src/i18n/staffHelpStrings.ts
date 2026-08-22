@@ -9,6 +9,9 @@ export type StaffHelpStrings = {
   tabEmergency: string;
   scheduleGuidelinesTitle: string;
   scheduleGuidelines: string[];
+  monthNames: string[];
+  weekdayShort: string[];
+  weekdayFull: string[];
   scheduleLoading: string;
   scheduleError: string;
   scheduleNotConfigured: string;
@@ -43,6 +46,14 @@ export const staffHelpStrings: Record<Language, StaffHelpStrings> = {
       "Busy with orders? You're welcome to come in 1–2 hrs early, just ask Brian first.",
       "Need a day off? Swap shifts with a coworker and give Brian at least 2 weeks' notice.",
     ],
+    monthNames: [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December",
+    ],
+    weekdayShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    weekdayFull: [
+      "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+    ],
     scheduleLoading: "Loading schedule…",
     scheduleError: "Couldn't load the schedule right now. Try again later.",
     scheduleNotConfigured: "Schedule isn't connected yet.",
@@ -74,6 +85,14 @@ export const staffHelpStrings: Record<Language, StaffHelpStrings> = {
       "Termine su pedido o encuentre un buen punto de pausa antes de terminar su turno. Está bien quedarse un poco más para terminar.",
       "¿Mucho trabajo? Puede llegar 1–2 horas antes, solo pregúntele a Brian primero.",
       "¿Necesita un día libre? Cambie su turno con un compañero y avísele a Brian con al menos 2 semanas de anticipación.",
+    ],
+    monthNames: [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+    ],
+    weekdayShort: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
+    weekdayFull: [
+      "Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado",
     ],
     scheduleLoading: "Cargando horario…",
     scheduleError: "No se pudo cargar el horario. Intenta de nuevo más tarde.",

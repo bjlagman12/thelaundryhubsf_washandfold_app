@@ -56,15 +56,6 @@ function monthGridWeeks(year: number, month: number): (number | null)[][] {
   return weeks;
 }
 
-const SHORT_WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const FULL_WEEKDAY = [
-  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-];
-const MONTH_NAME = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
 export default function ScheduleTab({ t }: { t: StaffHelpStrings }) {
@@ -123,7 +114,7 @@ export default function ScheduleTab({ t }: { t: StaffHelpStrings }) {
     });
   };
 
-  const viewMonthLabel = `${MONTH_NAME[viewMonth.month]} ${viewMonth.year}`;
+  const viewMonthLabel = `${t.monthNames[viewMonth.month]} ${viewMonth.year}`;
 
   const myUpcomingShifts = shifts
     .filter((s) => s.employee === selectedEmployee && s.date >= today)
@@ -225,7 +216,7 @@ export default function ScheduleTab({ t }: { t: StaffHelpStrings }) {
                 </button>
               </div>
               <div className={styles.calendarWeekdayRow}>
-                {SHORT_WEEKDAY.map((label) => (
+                {t.weekdayShort.map((label) => (
                   <div key={label} className={styles.calendarWeekdayLabel}>
                     {label}
                   </div>
@@ -293,7 +284,7 @@ export default function ScheduleTab({ t }: { t: StaffHelpStrings }) {
           {myScheduleByDay.map(({ date, shifts: dayShifts }) => {
             const avatarClass =
               EMPLOYEE_AVATAR_CLASS[selectedEmployee ?? ""] ?? FALLBACK_AVATAR_CLASS;
-            const dateLabel = `${FULL_WEEKDAY[date.getDay()]} ${pad2(
+            const dateLabel = `${t.weekdayFull[date.getDay()]} ${pad2(
               date.getMonth() + 1
             )}/${pad2(date.getDate())}`;
             return (
