@@ -9,7 +9,7 @@ import EmergencyTab from "./EmergencyTab";
 type Tab = "schedule" | "help" | "emergency";
 
 export default function StaffHelp() {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>("es");
   const [activeTab, setActiveTab] = useState<Tab>("schedule");
   const t = staffHelpStrings[language];
 
