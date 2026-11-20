@@ -58,8 +58,15 @@ const StepTwoForm: React.FC<StepTwoFormProps> = ({
         ]
       : []),
     { label: "Number of Bags", value: values.numberOfBags || "N/A" },
-    { label: "Drop-off Date", value: formatDate(values.dropOffDate) },
-    { label: "Drop-off Time", value: values.timeSlot || "N/A" },
+    ...(values.dropOffMethod === "locker"
+      ? [
+          { label: "Drop-off Method", value: "Locker" },
+          { label: "Locker Number(s)", value: values.lockerNumbers || "N/A" },
+        ]
+      : [
+          { label: "Drop-off Date", value: formatDate(values.dropOffDate) },
+          { label: "Drop-off Time", value: values.timeSlot || "N/A" },
+        ]),
     ...(values.specialRequests
       ? [{ label: "Notes", value: values.specialRequests }]
       : []),

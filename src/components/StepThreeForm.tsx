@@ -1,11 +1,21 @@
 import React from "react";
 import { Helmet } from "react-helmet";
+import { getLockerCode } from "../utils/lockerCode";
 
 type StepThreeFormProps = {
   orderId: string;
+  dropOffMethod?: "attendant" | "locker";
+  lockerNumbers?: string;
+  phone?: string;
 };
 
-const StepThreeForm: React.FC<StepThreeFormProps> = ({ orderId }) => {
+const StepThreeForm: React.FC<StepThreeFormProps> = ({
+  orderId,
+  dropOffMethod,
+  lockerNumbers,
+  phone,
+}) => {
+  const isLocker = dropOffMethod === "locker";
   return (
     <div className="text-center">
       <Helmet>
@@ -27,14 +37,24 @@ const StepThreeForm: React.FC<StepThreeFormProps> = ({ orderId }) => {
       <div className="text-3xl font-bold text-blue-600 my-4">#{orderId}</div>
 
       <div className="text-gray-600 text-sm">
-        <p className="my-2">
-          🧺 Please place your laundry in a securely tied plastic bag.
-        </p>
+        {isLocker ? (
+          <div className="my-2 space-y-1">
+            <p>🧺 Locker(s): {lockerNumbers}</p>
+            <p>🔑 Your code: {getLockerCode(phone || "")}</p>
+            <p>📱 We'll text you updates. When your order is ready, we'll text you the locker and access code for pickup.</p>
+          </div>
+        ) : (
+          <>
+            <p className="my-2">
+              🧺 Please place your laundry in a securely tied plastic bag.
+            </p>
 
-        <div className="my-2">
-          <p>👕 An attendant will be there to collect your laundry.</p>
-          <p>📱 Show your confirmation number at drop-off.</p>
-        </div>
+            <div className="my-2">
+              <p>👕 An attendant will be there to collect your laundry.</p>
+              <p>📱 Show your confirmation number at drop-off.</p>
+            </div>
+          </>
+        )}
 
         <p>We appreciate your business!</p>
         <a

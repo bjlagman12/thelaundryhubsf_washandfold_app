@@ -104,6 +104,19 @@ const StepZeroForm = ({
         <p className="mt-2 text-xs text-gray-500">
           Weekend drop-offs begin processing the following Monday.
         </p>
+
+        <div className="mt-3 border-2 border-green-600 bg-green-50 rounded-lg p-4 shadow-md">
+          <span className="inline-block bg-green-600 text-white text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mb-2">
+            New
+          </span>
+          <p className="text-lg font-bold text-green-900">
+            🔑 Hours don't work? Use our lockers!
+          </p>
+          <p className="text-sm text-green-900 mt-1">
+            Drop off in a locker anytime we're open, at your own time and
+            convenience. No need to schedule.
+          </p>
+        </div>
       </div>
 
       {/* Tier selection */}

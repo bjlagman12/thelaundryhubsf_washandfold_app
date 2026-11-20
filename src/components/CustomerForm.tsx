@@ -23,6 +23,9 @@ export type OrderForm = {
   notes?: string;
   serviceType: "" | "classic" | "priority" | "rush";
   newCustomer?: boolean;
+  dropOffMethod: "attendant" | "locker";
+  lockerNumbers?: string;
+  lockerConfirmed?: boolean;
 };
 
 const CustomerForm: React.FC = () => {
@@ -50,6 +53,9 @@ const CustomerForm: React.FC = () => {
       orderId: "",
       notes: "",
       serviceType: "",
+      dropOffMethod: "attendant",
+      lockerNumbers: "",
+      lockerConfirmed: false,
     },
   });
 
@@ -172,7 +178,12 @@ const CustomerForm: React.FC = () => {
               <h2 id="step-3-heading" className="sr-only">
                 Thank You
               </h2>
-              <StepThreeForm orderId={orderId} />
+              <StepThreeForm
+                orderId={orderId}
+                dropOffMethod={getValues("dropOffMethod")}
+                lockerNumbers={getValues("lockerNumbers")}
+                phone={getValues("phone")}
+              />
             </section>
           )}
         </section>

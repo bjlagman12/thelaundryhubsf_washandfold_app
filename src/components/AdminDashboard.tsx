@@ -22,6 +22,8 @@ interface Order {
   phone: string;
   createdAt?: { seconds: number; nanoseconds: number };
   dropOffDate?: string;
+  dropOffMethod?: string;
+  lockerNumbers?: string;
   laundryType: string;
   specialRequests?: string;
   status: string;
@@ -195,7 +197,9 @@ const AdminDashboard = () => {
                         {formatDate(order.createdAt)}
                       </td>
                       <td className="py-2 px-3">
-                        {formatDate(order.dropOffDate)}
+                        {order.dropOffMethod === "locker"
+                          ? `Locker ${order.lockerNumbers ?? ""}`
+                          : formatDate(order.dropOffDate)}
                       </td>
                       <td className="py-2 px-3 capitalize">
                         {order.laundryType}

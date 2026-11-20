@@ -34,7 +34,13 @@ export const sendSmsOnOrder = onDocumentCreated(
       { weekday: "long", month: "long", day: "2-digit" }
     );
 
-    const customerMessage = `🌀 Hi ${order.firstName}, your order was received by The Laundry Hub SF! Reminder: drop-off is ${dropOffDateFormatted}, ${order.timeSlot} — please be sure to drop off your laundry with an attendant. We’ll text you when it’s ready for pickup.`;
+    const isLocker = order.dropOffMethod === "locker";
+
+    const customerMessage = isLocker
+      ? `🌀 Hi ${order.firstName}, thank you for dropping off your laundry in our locker system! We received your order in ${
+          String(order.lockerNumbers || "").includes(",") ? "lockers" : "locker"
+        } ${order.lockerNumbers}. We'll start processing it when we retrieve it from the locker. We'll text you when it's ready, along with your pickup details.`
+      : `🌀 Hi ${order.firstName}, your order was received by The Laundry Hub SF! Reminder: drop-off is ${dropOffDateFormatted}, ${order.timeSlot} — please be sure to drop off your laundry with an attendant. We’ll text you when it’s ready for pickup.`;
 
     const ownerMessage = `📥 New drop-off order received
 - Name: ${order.firstName} ${order.lastName}
@@ -42,13 +48,15 @@ export const sendSmsOnOrder = onDocumentCreated(
 - Order ID: ${order.orderId}
 - Phone: ${order.phone}
 - Service Type: ${order.serviceType}
-- Drop-off Date: ${new Date(order.dropOffDate).toLocaleDateString("en-US", {
-      month: "long",
-      day: "2-digit",
-      year: "numeric",
-    })}
-- Time: ${order.timeSlot}
-- specialRequests: ${order.specialRequests || "N/A"}`;
+${
+  isLocker
+    ? `- Drop-off: LOCKER ${order.lockerNumbers}\n`
+    : `- Drop-off Date: ${new Date(order.dropOffDate).toLocaleDateString("en-US", {
+        month: "long",
+        day: "2-digit",
+        year: "numeric",
+      })}\n- Time: ${order.timeSlot}\n`
+}- specialRequests: ${order.specialRequests || "N/A"}`;
 
     const customerSend = client.messages.create({
       body: customerMessage,
@@ -56,7 +64,7 @@ export const sendSmsOnOrder = onDocumentCreated(
       from: TWILIO_PHONE.value(),
     });
 
-    const ownerPhones = ["+15109253180"];
+    const ownerPhones = ["+15109253180", "+14159161919"]; // owner + John
     const ownerSends = ownerPhones.map((ownerPhone) =>
       client.messages.create({
         body: ownerMessage,
