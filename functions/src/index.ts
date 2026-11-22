@@ -47,6 +47,8 @@ export const sendSmsOnOrder = onDocumentCreated(
 - New Customer: ${order.newCustomer ? "Yes" : "No"}
 - Order ID: ${order.orderId}
 - Phone: ${order.phone}
+- Email: ${order.email || "N/A"}
+- Number of Bags: ${order.numberOfBags || "N/A"}
 - Service Type: ${order.serviceType}
 ${
   isLocker
